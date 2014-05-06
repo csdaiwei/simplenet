@@ -42,4 +42,10 @@ int* topology_getNbrArray();
 //返回指定两个节点之间的直接链路代价. 
 //如果指定两个节点之间没有直接链路, 返回INFINITE_COST.
 unsigned int topology_getCost(int fromNodeID, int toNodeID);
+
+
+/** get local ip
+ */
+unsigned int topology_getLocalIP();
+
 #endif

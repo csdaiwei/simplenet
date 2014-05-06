@@ -4,7 +4,18 @@
 //
 //创建日期: 2013年1月
 
+#include <stdio.h>
+#include <netdb.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <arpa/inet.h>
+
 #include "topology.h"
+#include "../common/constants.h"
+
+#define MAX_HOST_NAME 100
+#define MAX_LINE_NUM  100
 
 //这个函数返回指定主机的节点ID.
 //节点ID是节点IP地址最后8位表示的整数.
@@ -63,4 +74,16 @@ int* topology_getNbrArray()
 unsigned int topology_getCost(int fromNodeID, int toNodeID)
 {
   return 0;
+}
+
+
+
+
+
+unsigned int topology_getLocalIP() {
+	char host_name[MAX_HOST_NAME];
+	gethostname(host_name, MAX_HOST_NAME);
+	struct hostent *host = gethostbyname(host_name);
+	unsigned int local_ip = ((host -> h_addr[0] + 1 ) << 24) + (host -> h_addr[1] << 16) + (host -> h_addr[2] << 8);
+	return local_ip;
 }

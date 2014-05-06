@@ -18,6 +18,10 @@ typedef struct neighborentry {
   int conn;	            //针对这个邻居的TCP连接套接字描述符
 } nbr_entry_t;
 
+
+//num of neighbor
+int nbr_entry_num;
+
 //这个函数首先动态创建一个邻居表. 然后解析文件topology/topology.dat, 填充所有条目中的nodeID和nodeIP字段, 将conn字段初始化为-1.
 //返回创建的邻居表.
 nbr_entry_t* nt_create();
@@ -27,5 +31,17 @@ void nt_destroy(nbr_entry_t* nt);
 
 //这个函数为邻居表中指定的邻居节点条目分配一个TCP连接. 如果分配成功, 返回1, 否则返回-1.
 int nt_addconn(nbr_entry_t* nt, int nodeID, int conn);
+
+
+/** get the num of node whose nodeID is larger than host's node ID
+ */
+int get_accept_node_num(nbr_entry_t *nt, int nodeID);
+
+
+/** accept the node or not
+	return 1  accept
+	return -1 not
+ */
+int need_accept_node(nbr_entry_t *nt, int nodeID, int neighborID);
 
 #endif
