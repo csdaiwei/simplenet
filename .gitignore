@@ -1,0 +1,16 @@
+server/*.txt
+client/*.txt
+
+common/*.o
+topology/*.o
+son/*.o
+son/son
+sip/*.o
+sip/sip
+client/*.o
+server/*.o
+client/app_simple_client
+client/app_stress_client
+server/app_simple_server
+server/app_stress_server
+
