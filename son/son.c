@@ -178,8 +178,12 @@ void son_stop() {
 }
 
 int main() {
+
+	host_node_id = topology_getMyNodeID();
+	nbr_entry_num = topology_getNbrNum();
+
 	//启动重叠网络初始化工作
-	printf("Overlay network: Node %d initializing...\n",topology_getMyNodeID());	
+	printf("Overlay network: Node %d initializing...\n", host_node_id);	
 
 	//创建一个邻居表
 	nt = nt_create();
@@ -190,9 +194,8 @@ int main() {
 	signal(SIGINT, son_stop);
 
 	//打印所有邻居
-	int nbrNum = topology_getNbrNum();
 	int i;
-	for(i=0;i<nbrNum;i++) {
+	for(i=0;i<nbr_entry_num;i++) {
 		printf("Overlay network: neighbor %d:%d\n",i+1,nt[i].nodeID);
 	}
 
@@ -212,7 +215,7 @@ int main() {
 	//此时, 所有与邻居之间的连接都建立好了
 	
 	//创建线程监听所有邻居
-	for(i=0;i<nbrNum;i++) {
+	for(i=0;i<nbr_entry_num;i++) {
 		int* idx = (int*)malloc(sizeof(int));
 		*idx = i;
 		pthread_t nbr_listen_thread;
@@ -223,4 +226,5 @@ int main() {
 
 	//等待来自SIP进程的连接
 	waitSIP();
+	return 0;
 }

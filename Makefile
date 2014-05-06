@@ -45,8 +45,8 @@ clean:
 	rm -rf server/app_simple_server
 	rm -rf server/app_stress_server
 	rm -rf server/receivedtext.txt
-
-
+	rm -rf sip/sip.dSYM
+	rm -rf son/son.dSYM
 
 #-pedantic -std=c99
 #-Wall

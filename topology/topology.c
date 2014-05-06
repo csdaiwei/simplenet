@@ -21,30 +21,52 @@
 //节点ID是节点IP地址最后8位表示的整数.
 //例如, 一个节点的IP地址为202.119.32.12, 它的节点ID就是12.
 //如果不能获取节点ID, 返回-1.
-int topology_getNodeIDfromname(char* hostname) 
-{
-  return 0;
+int topology_getNodeIDfromname(char *hostname) {
+  
+  struct hostent *host = gethostbyname(hostname);
+  if (host == NULL)
+    return -1;
+  return host -> h_addr[3] & 0x000000ff;
 }
+
 
 //这个函数返回指定的IP地址的节点ID.
 //如果不能获取节点ID, 返回-1.
-int topology_getNodeIDfromip(struct in_addr* addr)
-{
-  return 0;
+int topology_getNodeIDfromip(struct in_addr* addr) {
+
+  if (addr == NULL)
+    return -1;
+  return ntohl(addr -> s_addr) & 0x000000ff;  
 }
 
 //这个函数返回本机的节点ID
 //如果不能获取本机的节点ID, 返回-1.
-int topology_getMyNodeID()
-{
-  return 0;
+int topology_getMyNodeID() {
+
+  char host_name[MAX_HOST_NAME];
+  gethostname(host_name, MAX_HOST_NAME);
+  return topology_getNodeIDfromname(host_name);
 }
 
 //这个函数解析保存在文件topology.dat中的拓扑信息.
 //返回邻居数.
-int topology_getNbrNum()
-{
-  return 0;
+int topology_getNbrNum() {
+
+  char host_name[MAX_HOST_NAME];
+  gethostname(host_name, MAX_HOST_NAME);
+
+  FILE *fp = fopen("topology/topology.dat", "r");
+  char file_line[MAX_LINE_NUM];
+
+  int neighbor_num = 0;
+  while (fgets(file_line, MAX_LINE_NUM, fp) != NULL) {
+    char *host_name_1 = strtok(file_line, " ");
+    char *host_name_2 = strtok(NULL, " ");
+    if (strcmp(host_name, host_name_1) == 0 || strcmp(host_name, host_name_2) == 0)
+      neighbor_num ++;
+  }
+  fclose(fp);
+  return neighbor_num;
 }
 
 //这个函数解析保存在文件topology.dat中的拓扑信息.
@@ -63,22 +85,56 @@ int* topology_getNodeArray()
 
 //这个函数解析保存在文件topology.dat中的拓扑信息.
 //返回一个动态分配的数组, 它包含所有邻居的节点ID.
-int* topology_getNbrArray()
-{
-  return 0;
+int *topology_getNbrArray() {
+  
+  int *neighbor_id_array = (int *)malloc(sizeof(int) * topology_getNbrNum());
+
+  char host_name[MAX_HOST_NAME];
+  gethostname(host_name, MAX_HOST_NAME);
+
+  FILE *fp = fopen("topology/topology.dat", "r");
+  char file_line[MAX_LINE_NUM];
+
+  int num = 0;
+  while (fgets(file_line, MAX_LINE_NUM, fp) != NULL) {
+    char *host_name_1 = strtok(file_line, " ");
+    char *host_name_2 = strtok(NULL, " ");
+    if (strcmp(host_name, host_name_1) == 0) {
+      neighbor_id_array[num] = topology_getNodeIDfromname(host_name_2);
+      num ++;
+    }
+    if (strcmp(host_name, host_name_2) == 0) {
+      neighbor_id_array[num] = topology_getNodeIDfromname(host_name_1);
+      num ++;
+    }   
+  }
+  fclose(fp);
+  return neighbor_id_array;
 }
 
 //这个函数解析保存在文件topology.dat中的拓扑信息.
 //返回指定两个节点之间的直接链路代价. 
 //如果指定两个节点之间没有直接链路, 返回INFINITE_COST.
-unsigned int topology_getCost(int fromNodeID, int toNodeID)
-{
-  return 0;
+unsigned int topology_getCost(int fromNodeID, int toNodeID) {
+
+  FILE *fp = fopen("topology/topology.dat", "r");
+  char file_line[MAX_LINE_NUM];
+  
+  while (fgets(file_line, MAX_LINE_NUM, fp) != NULL) {
+    char *host_name_1 = strtok(file_line, " ");
+    char *host_name_2 = strtok(NULL, " ");
+    
+    if ((topology_getNodeIDfromname(host_name_1) == fromNodeID && 
+      topology_getNodeIDfromname(host_name_2) == toNodeID) ||
+      (topology_getNodeIDfromname(host_name_2) == fromNodeID && 
+      topology_getNodeIDfromname(host_name_1) == toNodeID)) {
+      char *cost = strtok(NULL, " ");
+      return (unsigned int)atoi(cost);
+      }
+  }
+  fclose(fp);
+  return INFINITE_COST;
 }
-
-
-
-
 
 unsigned int topology_getLocalIP() {
 	char host_name[MAX_HOST_NAME];

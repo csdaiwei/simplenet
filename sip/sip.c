@@ -134,8 +134,10 @@ void* pkthandler(void* arg) {
 //这个函数终止SIP进程, 当SIP进程收到信号SIGINT时会调用这个函数. 
 //它关闭所有连接, 释放所有动态分配的内存.
 void sip_stop() {
-	//你需要编写这里的代码.
-  return;
+//你需要编写这里的代码.
+	close(son_conn);
+	exit(0);
+	return;
 }
 
 //这个函数打开端口SIP_PORT并等待来自本地STCP进程的TCP连接.
@@ -143,8 +145,7 @@ void sip_stop() {
 //接收的段被封装进数据报(一个段在一个数据报中), 然后使用son_sendpkt发送该报文到下一跳. 下一跳节点ID提取自路由表.
 //当本地STCP进程断开连接时, 这个函数等待下一个STCP进程的连接.
 void waitSTCP() {
-	close(son_conn);
-	exit(0);
+
 }
 
 int main(int argc, char *argv[]) {
