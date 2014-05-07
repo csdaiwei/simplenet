@@ -155,6 +155,8 @@ void* pkthandler(void* arg) {
 void sip_stop() {
 
 	nbrcosttable_destroy(nct);
+	dvtable_destroy(dv);
+	routingtable_destroy(routingtable);
 	
 	close(son_conn);
 	exit(0);
@@ -201,16 +203,16 @@ int main(int argc, char *argv[]) {
 	dv = dvtable_create();
 	dv_mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
 	pthread_mutex_init(dv_mutex,NULL);
-	//routingtable = routingtable_create();
-	//routingtable_mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
-	//pthread_mutex_init(routingtable_mutex,NULL);
+	routingtable = routingtable_create();
+	routingtable_mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+	pthread_mutex_init(routingtable_mutex,NULL);
 	
 	son_conn = -1;
 	stcp_conn = -1;
 
 	nbrcosttable_print(nct);
-	//dvtable_print(dv);
-	//routingtable_print(routingtable);
+	dvtable_print(dv);
+	routingtable_print(routingtable);
 
 	//注册用于终止进程的信号句柄
 	signal(SIGINT, sip_stop);
