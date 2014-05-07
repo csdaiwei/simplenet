@@ -111,19 +111,32 @@ void* routeupdate_daemon(void* arg) {
 //如果报文是SIP报文,并且目的节点就是本节点,就转发报文给STCP进程. 如果目的节点不是本节点,
 //就根据路由表转发报文给下一跳.如果报文是路由更新报文,就更新距离矢量表和路由表.
 void* pkthandler(void* arg) {
+	
 	sip_pkt_t pkt;
+	memset(&pkt, 0, sizeof(sip_pkt_t));
+
 	while(son_recvpkt(&pkt, son_conn) > 0) {
-		pkt_routeupdate_t *packet_route_uptate = (pkt_routeupdate_t *)((char *)(&pkt) + SIP_HEADER_LEN);
+
+		// route update packet
+		if (pkt.header.type == ROUTE_UPDATE){
 		
-		printf("Routing: received a packet from neighbor %d\n", pkt.header.src_nodeID);
-		printf("====================\n");
-		printf("entryNum:\t%d\n", packet_route_uptate -> entryNum);
-		int i;
-		for (i = 0; i < packet_route_uptate -> entryNum; i++) {
-			printf("nodeID:\t\t%d\n", packet_route_uptate -> entry[i].nodeID);
-			printf("cost:\t\t%d\n", packet_route_uptate -> entry[i].cost);
+			pkt_routeupdate_t *packet_route_uptate = (pkt_routeupdate_t *)((char *)(&pkt) + SIP_HEADER_LEN);
+		
+			printf("Routing: received a route update packet from neighbor %d\n", pkt.header.src_nodeID);
+			printf("====================\n");
+			printf("entryNum:\t%d\n", packet_route_uptate -> entryNum);
+			int i;
+			for (i = 0; i < packet_route_uptate -> entryNum; i++) {
+				printf("nodeID:\t\t%d\n", packet_route_uptate -> entry[i].nodeID);
+				printf("cost:\t\t%d\n", packet_route_uptate -> entry[i].cost);
+			}
+			printf("====================\n");
 		}
-		printf("====================\n");
+
+		if (pkt.header.type == SIP){
+		
+			printf("get an sip packet\n");
+		}
 	}
 
 	close(son_conn);
@@ -143,8 +156,32 @@ void sip_stop() {
 //这个函数打开端口SIP_PORT并等待来自本地STCP进程的TCP连接.
 //在连接建立后, 这个函数从STCP进程处持续接收包含段及其目的节点ID的sendseg_arg_t. 
 //接收的段被封装进数据报(一个段在一个数据报中), 然后使用son_sendpkt发送该报文到下一跳. 下一跳节点ID提取自路由表.
-//当本地STCP进程断开连接时, 这个函数等待下一个STCP进程的连接.
+//当本地STCP进程断开连接时, 这个函数等待下一个STCP进程的连接. // ?
 void waitSTCP() {
+
+
+	int listenfd = socket(AF_INET, SOCK_STREAM, 0);
+	struct sockaddr_in server_addr, client_addr;
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	server_addr.sin_port = htons(SIP_PORT);
+
+	bind(listenfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+	listen(listenfd, MAX_NODE_NUM);
+	const int on = 1;
+	setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+
+	socklen_t client_len = sizeof(client_addr);
+	stcp_conn = accept(listenfd, (struct sockaddr *)&client_addr, &client_len);
+	close(listenfd);
+	printf("STCP has connected to local SIP network\n");
+	
+	while (true) {
+
+		//receive a packet from STCP
+		//getsegToSend...
+		sleep(1);
+	}
 
 }
 
@@ -152,19 +189,20 @@ int main(int argc, char *argv[]) {
 	printf("SIP layer is starting, pls wait...\n");
 
 	//初始化全局变量
-	nct = nbrcosttable_create();
-	dv = dvtable_create();
-	dv_mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
-	pthread_mutex_init(dv_mutex,NULL);
-	routingtable = routingtable_create();
-	routingtable_mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
-	pthread_mutex_init(routingtable_mutex,NULL);
+	//nct = nbrcosttable_create();
+	//dv = dvtable_create();
+	//dv_mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+	//pthread_mutex_init(dv_mutex,NULL);
+	//routingtable = routingtable_create();
+	//routingtable_mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+	//pthread_mutex_init(routingtable_mutex,NULL);
+	
 	son_conn = -1;
 	stcp_conn = -1;
 
-	nbrcosttable_print(nct);
-	dvtable_print(dv);
-	routingtable_print(routingtable);
+	//nbrcosttable_print(nct);
+	//dvtable_print(dv);
+	//routingtable_print(routingtable);
 
 	//注册用于终止进程的信号句柄
 	signal(SIGINT, sip_stop);
@@ -187,7 +225,7 @@ int main(int argc, char *argv[]) {
 	printf("SIP layer is started...\n");
 	printf("waiting for routes to be established\n");
 	sleep(SIP_WAITTIME);
-	routingtable_print(routingtable);
+	//routingtable_print(routingtable);
 
 	//等待来自STCP进程的连接
 	printf("waiting for connection from STCP process\n");
