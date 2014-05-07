@@ -198,9 +198,9 @@ int main(int argc, char *argv[]) {
 
 	//初始化全局变量
 	nct = nbrcosttable_create();
-	//dv = dvtable_create();
-	//dv_mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
-	//pthread_mutex_init(dv_mutex,NULL);
+	dv = dvtable_create();
+	dv_mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+	pthread_mutex_init(dv_mutex,NULL);
 	//routingtable = routingtable_create();
 	//routingtable_mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
 	//pthread_mutex_init(routingtable_mutex,NULL);
