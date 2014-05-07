@@ -94,13 +94,15 @@ void* routeupdate_daemon(void* arg) {
 			break;
 
 		printf("Routing: broadcast a route update packet to all neighbors\n");
+		
+		/*
 		printf("====================\n");
 		printf("entryNum:\t%d\n", packet_route_uptate.entryNum);
 		for (i = 0; i < packet_route_uptate.entryNum; i++) {
 			printf("nodeID:\t\t%d\n", neighbor_node_id_array[i]);
 			printf("cost:\t\t%d\n", packet_route_uptate.entry[i].cost);
 		}
-		printf("====================\n");
+		printf("====================\n");*/
 
 		sleep(ROUTEUPDATE_INTERVAL);
 	}
@@ -117,11 +119,15 @@ void* pkthandler(void* arg) {
 
 	while(son_recvpkt(&pkt, son_conn) > 0) {
 
+		printf("get a packet from %d, to %d, ", pkt.header.src_nodeID, pkt.header.dest_nodeID);
+
 		// route update packet
 		if (pkt.header.type == ROUTE_UPDATE){
 		
 			pkt_routeupdate_t *packet_route_uptate = (pkt_routeupdate_t *)((char *)(&pkt) + SIP_HEADER_LEN);
-		
+			
+			printf("it's a route update packet.\n");
+			/*
 			printf("Routing: received a route update packet from neighbor %d\n", pkt.header.src_nodeID);
 			printf("====================\n");
 			printf("entryNum:\t%d\n", packet_route_uptate -> entryNum);
@@ -130,12 +136,12 @@ void* pkthandler(void* arg) {
 				printf("nodeID:\t\t%d\n", packet_route_uptate -> entry[i].nodeID);
 				printf("cost:\t\t%d\n", packet_route_uptate -> entry[i].cost);
 			}
-			printf("====================\n");
+			printf("====================\n");*/
 		}
 
 		if (pkt.header.type == SIP){
 		
-			printf("get an sip packet\n");
+			printf("it's a sip packet.\n");
 		}
 	}
 
@@ -147,7 +153,9 @@ void* pkthandler(void* arg) {
 //这个函数终止SIP进程, 当SIP进程收到信号SIGINT时会调用这个函数. 
 //它关闭所有连接, 释放所有动态分配的内存.
 void sip_stop() {
-//你需要编写这里的代码.
+
+	nbrcosttable_destroy(nct);
+	
 	close(son_conn);
 	exit(0);
 	return;
@@ -189,7 +197,7 @@ int main(int argc, char *argv[]) {
 	printf("SIP layer is starting, pls wait...\n");
 
 	//初始化全局变量
-	//nct = nbrcosttable_create();
+	nct = nbrcosttable_create();
 	//dv = dvtable_create();
 	//dv_mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
 	//pthread_mutex_init(dv_mutex,NULL);
@@ -200,7 +208,7 @@ int main(int argc, char *argv[]) {
 	son_conn = -1;
 	stcp_conn = -1;
 
-	//nbrcosttable_print(nct);
+	nbrcosttable_print(nct);
 	//dvtable_print(dv);
 	//routingtable_print(routingtable);
 
