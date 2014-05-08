@@ -30,13 +30,13 @@ unsigned int get_time(){
 
 /*********************************************************************/
 //
-//STCP APIÊµÏÖ
+//STCP APIå®žçŽ°
 //
 /*********************************************************************/
 
-// Õâ¸öº¯Êý³õÊ¼»¯TCB±í, ½«ËùÓÐÌõÄ¿±ê¼ÇÎªNULL.  
-// Ëü»¹Õë¶ÔTCPÌ×½Ó×ÖÃèÊö·ûconn³õÊ¼»¯Ò»¸öSTCP²ãµÄÈ«¾Ö±äÁ¿, ¸Ã±äÁ¿×÷Îªsip_sendsegºÍsip_recvsegµÄÊäÈë²ÎÊý.
-// ×îºó, Õâ¸öº¯ÊýÆô¶¯seghandlerÏß³ÌÀ´´¦Àí½øÈëµÄSTCP¶Î. ¿Í»§¶ËÖ»ÓÐÒ»¸öseghandler.
+// è¿™ä¸ªå‡½æ•°åˆå§‹åŒ–TCBè¡¨, å°†æ‰€æœ‰æ¡ç›®æ ‡è®°ä¸ºNULL.  
+// å®ƒè¿˜é’ˆå¯¹TCPå¥—æŽ¥å­—æè¿°ç¬¦connåˆå§‹åŒ–ä¸€ä¸ªSTCPå±‚çš„å…¨å±€å˜é‡, è¯¥å˜é‡ä½œä¸ºsip_sendsegå’Œsip_recvsegçš„è¾“å…¥å‚æ•°.
+// æœ€åŽ, è¿™ä¸ªå‡½æ•°å¯åŠ¨seghandlerçº¿ç¨‹æ¥å¤„ç†è¿›å…¥çš„STCPæ®µ. å®¢æˆ·ç«¯åªæœ‰ä¸€ä¸ªseghandler.
 void stcp_client_init(int conn) 
 {
 	gettimeofday(&prog_start_time, NULL);
@@ -49,10 +49,10 @@ void stcp_client_init(int conn)
   	return;
 }
 
-// Õâ¸öº¯Êý²éÕÒ¿Í»§¶ËTCB±íÒÔÕÒµ½µÚÒ»¸öNULLÌõÄ¿, È»ºóÊ¹ÓÃmalloc()Îª¸ÃÌõÄ¿´´½¨Ò»¸öÐÂµÄTCBÌõÄ¿.
-// ¸ÃTCBÖÐµÄËùÓÐ×Ö¶Î¶¼±»³õÊ¼»¯. ÀýÈç, TCB state±»ÉèÖÃÎªCLOSED£¬¿Í»§¶Ë¶Ë¿Ú±»ÉèÖÃÎªº¯Êýµ÷ÓÃ²ÎÊýclient_port. 
-// TCB±íÖÐÌõÄ¿µÄË÷ÒýºÅÓ¦×÷Îª¿Í»§¶ËµÄÐÂÌ×½Ó×ÖID±»Õâ¸öº¯Êý·µ»Ø, ËüÓÃÓÚ±êÊ¶¿Í»§¶ËµÄÁ¬½Ó. 
-// Èç¹ûTCB±íÖÐÃ»ÓÐÌõÄ¿¿ÉÓÃ, Õâ¸öº¯Êý·µ»Ø-1.
+// è¿™ä¸ªå‡½æ•°æŸ¥æ‰¾å®¢æˆ·ç«¯TCBè¡¨ä»¥æ‰¾åˆ°ç¬¬ä¸€ä¸ªNULLæ¡ç›®, ç„¶åŽä½¿ç”¨malloc()ä¸ºè¯¥æ¡ç›®åˆ›å»ºä¸€ä¸ªæ–°çš„TCBæ¡ç›®.
+// è¯¥TCBä¸­çš„æ‰€æœ‰å­—æ®µéƒ½è¢«åˆå§‹åŒ–. ä¾‹å¦‚, TCB stateè¢«è®¾ç½®ä¸ºCLOSEDï¼Œå®¢æˆ·ç«¯ç«¯å£è¢«è®¾ç½®ä¸ºå‡½æ•°è°ƒç”¨å‚æ•°client_port. 
+// TCBè¡¨ä¸­æ¡ç›®çš„ç´¢å¼•å·åº”ä½œä¸ºå®¢æˆ·ç«¯çš„æ–°å¥—æŽ¥å­—IDè¢«è¿™ä¸ªå‡½æ•°è¿”å›ž, å®ƒç”¨äºŽæ ‡è¯†å®¢æˆ·ç«¯çš„è¿žæŽ¥. 
+// å¦‚æžœTCBè¡¨ä¸­æ²¡æœ‰æ¡ç›®å¯ç”¨, è¿™ä¸ªå‡½æ•°è¿”å›ž-1.
 int stcp_client_sock(unsigned int client_port) 
 {
 	int i;
@@ -75,10 +75,10 @@ int stcp_client_sock(unsigned int client_port)
 	return -1;
 }
 
-// Õâ¸öº¯ÊýÓÃÓÚÁ¬½Ó·þÎñÆ÷. ËüÒÔÌ×½Ó×ÖID, ·þÎñÆ÷½ÚµãIDºÍ·þÎñÆ÷µÄ¶Ë¿ÚºÅ×÷ÎªÊäÈë²ÎÊý. Ì×½Ó×ÖIDÓÃÓÚÕÒµ½TCBÌõÄ¿.  
-// Õâ¸öº¯ÊýÉèÖÃTCBµÄ·þÎñÆ÷½ÚµãIDºÍ·þÎñÆ÷¶Ë¿ÚºÅ,  È»ºóÊ¹ÓÃsip_sendseg()·¢ËÍÒ»¸öSYN¶Î¸ø·þÎñÆ÷.  
-// ÔÚ·¢ËÍÁËSYN¶ÎÖ®ºó, Ò»¸ö¶¨Ê±Æ÷±»Æô¶¯. Èç¹ûÔÚSYNSEG_TIMEOUTÊ±¼äÖ®ÄÚÃ»ÓÐÊÕµ½SYNACK, SYN ¶Î½«±»ÖØ´«. 
-// Èç¹ûÊÕµ½ÁË, ¾Í·µ»Ø1. ·ñÔò, Èç¹ûÖØ´«SYNµÄ´ÎÊý´óÓÚSYN_MAX_RETRY, ¾Í½«state×ª»»µ½CLOSED, ²¢·µ»Ø-1.
+// è¿™ä¸ªå‡½æ•°ç”¨äºŽè¿žæŽ¥æœåŠ¡å™¨. å®ƒä»¥å¥—æŽ¥å­—ID, æœåŠ¡å™¨èŠ‚ç‚¹IDå’ŒæœåŠ¡å™¨çš„ç«¯å£å·ä½œä¸ºè¾“å…¥å‚æ•°. å¥—æŽ¥å­—IDç”¨äºŽæ‰¾åˆ°TCBæ¡ç›®.  
+// è¿™ä¸ªå‡½æ•°è®¾ç½®TCBçš„æœåŠ¡å™¨èŠ‚ç‚¹IDå’ŒæœåŠ¡å™¨ç«¯å£å·,  ç„¶åŽä½¿ç”¨sip_sendseg()å‘é€ä¸€ä¸ªSYNæ®µç»™æœåŠ¡å™¨.  
+// åœ¨å‘é€äº†SYNæ®µä¹‹åŽ, ä¸€ä¸ªå®šæ—¶å™¨è¢«å¯åŠ¨. å¦‚æžœåœ¨SYNSEG_TIMEOUTæ—¶é—´ä¹‹å†…æ²¡æœ‰æ”¶åˆ°SYNACK, SYN æ®µå°†è¢«é‡ä¼ . 
+// å¦‚æžœæ”¶åˆ°äº†, å°±è¿”å›ž1. å¦åˆ™, å¦‚æžœé‡ä¼ SYNçš„æ¬¡æ•°å¤§äºŽSYN_MAX_RETRY, å°±å°†stateè½¬æ¢åˆ°CLOSED, å¹¶è¿”å›ž-1.
 int stcp_client_connect(int sockfd, int nodeID, unsigned int server_port) 
 {
 	if (sockfd < 0 || sockfd >= MAX_TRANSPORT_CONNECTIONS)
@@ -117,15 +117,15 @@ int stcp_client_connect(int sockfd, int nodeID, unsigned int server_port)
 	}
 }
 
-// ·¢ËÍÊý¾Ý¸øSTCP·þÎñÆ÷. Õâ¸öº¯ÊýÊ¹ÓÃÌ×½Ó×ÖIDÕÒµ½TCB±íÖÐµÄÌõÄ¿.
-// È»ºóËüÊ¹ÓÃÌá¹©µÄÊý¾Ý´´½¨segBuf, ½«Ëü¸½¼Óµ½·¢ËÍ»º³åÇøÁ´±íÖÐ.
-// Èç¹û·¢ËÍ»º³åÇøÔÚ²åÈëÊý¾ÝÖ®Ç°Îª¿Õ, Ò»¸öÃûÎªsendbuf_timerµÄÏß³Ì¾Í»áÆô¶¯.
-// Ã¿¸ôSENDBUF_ROLLING_INTERVALÊ±¼ä²éÑ¯·¢ËÍ»º³åÇøÒÔ¼ì²éÊÇ·ñÓÐ³¬Ê±ÊÂ¼þ·¢Éú. 
-// Õâ¸öº¯ÊýÔÚ³É¹¦Ê±·µ»Ø1£¬·ñÔò·µ»Ø-1. 
-// stcp_client_sendÊÇÒ»¸ö·Ç×èÈûº¯Êýµ÷ÓÃ.
-// ÒòÎªÓÃ»§Êý¾Ý±»·ÖÆ¬Îª¹Ì¶¨´óÐ¡µÄSTCP¶Î, ËùÒÔÒ»´Îstcp_client_sendµ÷ÓÃ¿ÉÄÜ»á²úÉú¶à¸ösegBuf
-// ±»Ìí¼Óµ½·¢ËÍ»º³åÇøÁ´±íÖÐ. Èç¹ûµ÷ÓÃ³É¹¦, Êý¾Ý¾Í±»·ÅÈëTCB·¢ËÍ»º³åÇøÁ´±íÖÐ, ¸ù¾Ý»¬¶¯´°¿ÚµÄÇé¿ö,
-// Êý¾Ý¿ÉÄÜ±»´«Êäµ½ÍøÂçÖÐ, »òÔÚ¶ÓÁÐÖÐµÈ´ý´«Êä.
+// å‘é€æ•°æ®ç»™STCPæœåŠ¡å™¨. è¿™ä¸ªå‡½æ•°ä½¿ç”¨å¥—æŽ¥å­—IDæ‰¾åˆ°TCBè¡¨ä¸­çš„æ¡ç›®.
+// ç„¶åŽå®ƒä½¿ç”¨æä¾›çš„æ•°æ®åˆ›å»ºsegBuf, å°†å®ƒé™„åŠ åˆ°å‘é€ç¼“å†²åŒºé“¾è¡¨ä¸­.
+// å¦‚æžœå‘é€ç¼“å†²åŒºåœ¨æ’å…¥æ•°æ®ä¹‹å‰ä¸ºç©º, ä¸€ä¸ªåä¸ºsendbuf_timerçš„çº¿ç¨‹å°±ä¼šå¯åŠ¨.
+// æ¯éš”SENDBUF_ROLLING_INTERVALæ—¶é—´æŸ¥è¯¢å‘é€ç¼“å†²åŒºä»¥æ£€æŸ¥æ˜¯å¦æœ‰è¶…æ—¶äº‹ä»¶å‘ç”Ÿ. 
+// è¿™ä¸ªå‡½æ•°åœ¨æˆåŠŸæ—¶è¿”å›ž1ï¼Œå¦åˆ™è¿”å›ž-1. 
+// stcp_client_sendæ˜¯ä¸€ä¸ªéžé˜»å¡žå‡½æ•°è°ƒç”¨.
+// å› ä¸ºç”¨æˆ·æ•°æ®è¢«åˆ†ç‰‡ä¸ºå›ºå®šå¤§å°çš„STCPæ®µ, æ‰€ä»¥ä¸€æ¬¡stcp_client_sendè°ƒç”¨å¯èƒ½ä¼šäº§ç”Ÿå¤šä¸ªsegBuf
+// è¢«æ·»åŠ åˆ°å‘é€ç¼“å†²åŒºé“¾è¡¨ä¸­. å¦‚æžœè°ƒç”¨æˆåŠŸ, æ•°æ®å°±è¢«æ”¾å…¥TCBå‘é€ç¼“å†²åŒºé“¾è¡¨ä¸­, æ ¹æ®æ»‘åŠ¨çª—å£çš„æƒ…å†µ,
+// æ•°æ®å¯èƒ½è¢«ä¼ è¾“åˆ°ç½‘ç»œä¸­, æˆ–åœ¨é˜Ÿåˆ—ä¸­ç­‰å¾…ä¼ è¾“.
 int stcp_client_send(int sockfd, void* data, unsigned int length) 
 {
     if (sockfd < 0 || sockfd >= MAX_TRANSPORT_CONNECTIONS)
@@ -197,10 +197,10 @@ int stcp_client_send(int sockfd, void* data, unsigned int length)
   		return stcp_client_send(sockfd, (char *)data + MAX_SEG_LEN, length - MAX_SEG_LEN);
 }
 
-// Õâ¸öº¯ÊýÓÃÓÚ¶Ï¿ªµ½·þÎñÆ÷µÄÁ¬½Ó. ËüÒÔÌ×½Ó×ÖID×÷ÎªÊäÈë²ÎÊý. Ì×½Ó×ÖIDÓÃÓÚÕÒµ½TCB±íÖÐµÄÌõÄ¿.  
-// Õâ¸öº¯Êý·¢ËÍFIN¶Î¸ø·þÎñÆ÷. ÔÚ·¢ËÍFINÖ®ºó, state½«×ª»»µ½FINWAIT, ²¢Æô¶¯Ò»¸ö¶¨Ê±Æ÷.
-// Èç¹ûÔÚ×îÖÕ³¬Ê±Ö®Ç°state×ª»»µ½CLOSED, Ôò±íÃ÷FINACKÒÑ±»³É¹¦½ÓÊÕ. ·ñÔò, Èç¹ûÔÚ¾­¹ýFIN_MAX_RETRY´Î³¢ÊÔÖ®ºó,
-// stateÈÔÈ»ÎªFINWAIT, state½«×ª»»µ½CLOSED, ²¢·µ»Ø-1.
+// è¿™ä¸ªå‡½æ•°ç”¨äºŽæ–­å¼€åˆ°æœåŠ¡å™¨çš„è¿žæŽ¥. å®ƒä»¥å¥—æŽ¥å­—IDä½œä¸ºè¾“å…¥å‚æ•°. å¥—æŽ¥å­—IDç”¨äºŽæ‰¾åˆ°TCBè¡¨ä¸­çš„æ¡ç›®.  
+// è¿™ä¸ªå‡½æ•°å‘é€FINæ®µç»™æœåŠ¡å™¨. åœ¨å‘é€FINä¹‹åŽ, stateå°†è½¬æ¢åˆ°FINWAIT, å¹¶å¯åŠ¨ä¸€ä¸ªå®šæ—¶å™¨.
+// å¦‚æžœåœ¨æœ€ç»ˆè¶…æ—¶ä¹‹å‰stateè½¬æ¢åˆ°CLOSED, åˆ™è¡¨æ˜ŽFINACKå·²è¢«æˆåŠŸæŽ¥æ”¶. å¦åˆ™, å¦‚æžœåœ¨ç»è¿‡FIN_MAX_RETRYæ¬¡å°è¯•ä¹‹åŽ,
+// stateä»ç„¶ä¸ºFINWAIT, stateå°†è½¬æ¢åˆ°CLOSED, å¹¶è¿”å›ž-1.
 int stcp_client_disconnect(int sockfd) 
 {
 	if (sockfd < 0 || sockfd >= MAX_TRANSPORT_CONNECTIONS)
@@ -249,8 +249,8 @@ int stcp_client_disconnect(int sockfd)
 	}
 }
 
-// Õâ¸öº¯Êýµ÷ÓÃfree()ÊÍ·ÅTCBÌõÄ¿. Ëü½«¸ÃÌõÄ¿±ê¼ÇÎªNULL, ³É¹¦Ê±(¼´Î»ÓÚÕýÈ·µÄ×´Ì¬)·µ»Ø1,
-// Ê§°ÜÊ±(¼´Î»ÓÚ´íÎóµÄ×´Ì¬)·µ»Ø-1.
+// è¿™ä¸ªå‡½æ•°è°ƒç”¨free()é‡Šæ”¾TCBæ¡ç›®. å®ƒå°†è¯¥æ¡ç›®æ ‡è®°ä¸ºNULL, æˆåŠŸæ—¶(å³ä½äºŽæ­£ç¡®çš„çŠ¶æ€)è¿”å›ž1,
+// å¤±è´¥æ—¶(å³ä½äºŽé”™è¯¯çš„çŠ¶æ€)è¿”å›ž-1.
 int stcp_client_close(int sockfd) 
 {
 	if (sockfd < 0 || sockfd >= MAX_TRANSPORT_CONNECTIONS)
@@ -284,9 +284,9 @@ int stcp_get_sockfd(seg_t *segment) {
 	return -1;
 }
 
-// ÕâÊÇÓÉstcp_client_init()Æô¶¯µÄÏß³Ì. Ëü´¦ÀíËùÓÐÀ´×Ô·þÎñÆ÷µÄ½øÈë¶Î. 
-// seghandler±»Éè¼ÆÎªÒ»¸öµ÷ÓÃsip_recvseg()µÄÎÞÇîÑ­»·. Èç¹ûsip_recvseg()Ê§°Ü, ÔòËµÃ÷µ½SIP½ø³ÌµÄÁ¬½ÓÒÑ¹Ø±Õ,
-// Ïß³Ì½«ÖÕÖ¹. ¸ù¾ÝSTCP¶Îµ½´ïÊ±Á¬½ÓËù´¦µÄ×´Ì¬, ¿ÉÒÔ²ÉÈ¡²»Í¬µÄ¶¯×÷. Çë²é¿´¿Í»§¶ËFSMÒÔÁË½â¸ü¶àÏ¸½Ú.
+// è¿™æ˜¯ç”±stcp_client_init()å¯åŠ¨çš„çº¿ç¨‹. å®ƒå¤„ç†æ‰€æœ‰æ¥è‡ªæœåŠ¡å™¨çš„è¿›å…¥æ®µ. 
+// seghandlerè¢«è®¾è®¡ä¸ºä¸€ä¸ªè°ƒç”¨sip_recvseg()çš„æ— ç©·å¾ªçŽ¯. å¦‚æžœsip_recvseg()å¤±è´¥, åˆ™è¯´æ˜Žåˆ°SIPè¿›ç¨‹çš„è¿žæŽ¥å·²å…³é—­,
+// çº¿ç¨‹å°†ç»ˆæ­¢. æ ¹æ®STCPæ®µåˆ°è¾¾æ—¶è¿žæŽ¥æ‰€å¤„çš„çŠ¶æ€, å¯ä»¥é‡‡å–ä¸åŒçš„åŠ¨ä½œ. è¯·æŸ¥çœ‹å®¢æˆ·ç«¯FSMä»¥äº†è§£æ›´å¤šç»†èŠ‚.
 void* seghandler(void* arg) 
 {
   	seg_t recv_segment;
@@ -372,9 +372,9 @@ void* seghandler(void* arg)
 }
 
 
-//Õâ¸öÏß³Ì³ÖÐøÂÖÑ¯·¢ËÍ»º³åÇøÒÔ´¥·¢³¬Ê±ÊÂ¼þ. Èç¹û·¢ËÍ»º³åÇø·Ç¿Õ, ËüÓ¦Ò»Ö±ÔËÐÐ.
-//Èç¹û(µ±Ç°Ê±¼ä - µÚÒ»¸öÒÑ·¢ËÍµ«Î´±»È·ÈÏ¶ÎµÄ·¢ËÍÊ±¼ä) > DATA_TIMEOUT, ¾Í·¢ÉúÒ»´Î³¬Ê±ÊÂ¼þ.
-//µ±³¬Ê±ÊÂ¼þ·¢ÉúÊ±, ÖØÐÂ·¢ËÍËùÓÐÒÑ·¢ËÍµ«Î´±»È·ÈÏ¶Î. µ±·¢ËÍ»º³åÇøÎª¿ÕÊ±, Õâ¸öÏß³Ì½«ÖÕÖ¹.
+//è¿™ä¸ªçº¿ç¨‹æŒç»­è½®è¯¢å‘é€ç¼“å†²åŒºä»¥è§¦å‘è¶…æ—¶äº‹ä»¶. å¦‚æžœå‘é€ç¼“å†²åŒºéžç©º, å®ƒåº”ä¸€ç›´è¿è¡Œ.
+//å¦‚æžœ(å½“å‰æ—¶é—´ - ç¬¬ä¸€ä¸ªå·²å‘é€ä½†æœªè¢«ç¡®è®¤æ®µçš„å‘é€æ—¶é—´) > DATA_TIMEOUT, å°±å‘ç”Ÿä¸€æ¬¡è¶…æ—¶äº‹ä»¶.
+//å½“è¶…æ—¶äº‹ä»¶å‘ç”Ÿæ—¶, é‡æ–°å‘é€æ‰€æœ‰å·²å‘é€ä½†æœªè¢«ç¡®è®¤æ®µ. å½“å‘é€ç¼“å†²åŒºä¸ºç©ºæ—¶, è¿™ä¸ªçº¿ç¨‹å°†ç»ˆæ­¢.
 void* sendBuf_timer(void* clienttcb) 
 {
 	client_tcb_t* tcb = (client_tcb_t*)clienttcb;
