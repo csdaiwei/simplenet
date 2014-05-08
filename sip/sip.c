@@ -32,7 +32,7 @@
 #define LOACLHOST "127.0.0.1"
 
 //SIP层等待这段时间让SIP路由协议建立路由路径. 
-#define SIP_WAITTIME 11
+#define SIP_WAITTIME 30
 
 /**************************************************************/
 //声明全局变量
@@ -173,6 +173,7 @@ void* pkthandler(void* arg) {
 					int result = son_sendpkt(nextNodeID, &pkt, son_conn);
 					printf("forward it to node %d, result %d\n", nextNodeID, result);
 				}
+				printf("error, dest node unreachable\n");
 			}
 		}
 	}
