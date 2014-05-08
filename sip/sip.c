@@ -32,7 +32,7 @@
 #define LOACLHOST "127.0.0.1"
 
 //SIP层等待这段时间让SIP路由协议建立路由路径. 
-#define SIP_WAITTIME 60
+#define SIP_WAITTIME 20
 
 /**************************************************************/
 //声明全局变量
@@ -44,6 +44,8 @@ dv_t* dv;				//距离矢量表
 pthread_mutex_t* dv_mutex;		//距离矢量表互斥量
 routingtable_t* routingtable;		//路由表
 pthread_mutex_t* routingtable_mutex;	//路由表互斥量
+
+int host_node;	//new
 
 /**************************************************************/
 //实现SIP的函数
@@ -69,23 +71,23 @@ int connectToSON() {
 //这个线程每隔ROUTEUPDATE_INTERVAL时间发送路由更新报文.路由更新报文包含这个节点
 //的距离矢量.广播是通过设置SIP报文头中的dest_nodeID为BROADCAST_NODEID,并通过son_sendpkt()发送报文来完成的.
 void* routeupdate_daemon(void* arg) {
+	
 	sip_pkt_t sip_packet;
-	sip_packet.header.src_nodeID = topology_getMyNodeID();
+	sip_packet.header.src_nodeID = host_node;
 	sip_packet.header.dest_nodeID = BROADCAST_NODEID;
 	sip_packet.header.type = ROUTE_UPDATE;
 	
+	//use a routeupdate packet as the distance vector of the source node
 	pkt_routeupdate_t packet_route_uptate;
-	packet_route_uptate.entryNum = topology_getNbrNum();
-	int host_node_id = topology_getMyNodeID();
-	int *neighbor_node_id_array = topology_getNbrArray();
+	packet_route_uptate.entryNum = topology_getNodeNum();
+	int* node_array = topology_getNodeArray();
 	int i;
 	for (i = 0; i < packet_route_uptate.entryNum; i ++) {
-		packet_route_uptate.entry[i].nodeID = neighbor_node_id_array[i];
-		packet_route_uptate.entry[i].cost = topology_getCost(host_node_id, neighbor_node_id_array[i]);
+		packet_route_uptate.entry[i].nodeID = node_array[i];
+		packet_route_uptate.entry[i].cost = dvtable_getcost(dv, host_node, node_array[i]);
 	}
 	sip_packet.header.length = sizeof(unsigned int) * (2 * packet_route_uptate.entryNum + 1);
 	memcpy(sip_packet.data, &packet_route_uptate, sip_packet.header.length);
-	
 
 	int connd;
 	while (true) {
@@ -94,20 +96,52 @@ void* routeupdate_daemon(void* arg) {
 			break;
 
 		printf("Routing: broadcast a route update packet to all neighbors\n");
-		
-		/*
-		printf("====================\n");
-		printf("entryNum:\t%d\n", packet_route_uptate.entryNum);
-		for (i = 0; i < packet_route_uptate.entryNum; i++) {
-			printf("nodeID:\t\t%d\n", neighbor_node_id_array[i]);
-			printf("cost:\t\t%d\n", packet_route_uptate.entry[i].cost);
-		}
-		printf("====================\n");*/
 
 		sleep(ROUTEUPDATE_INTERVAL);
 	}
 	return NULL;
 }
+
+
+/*func on recving a route update packet*/
+void route_update(sip_pkt_t* pkt){
+
+	int i, j;
+	int* node_array = topology_getNodeArray();
+	int node_num = topology_getNodeNum();
+	int* nbr_node_array = topology_getNbrArray();
+	int nbr_node_num = topology_getNbrNum();
+
+	pkt_routeupdate_t *rup = (pkt_routeupdate_t *)((char *)(pkt) + SIP_HEADER_LEN);
+
+	for (i = 0; i < rup -> entryNum; ++i)
+		dvtable_setcost(dv, pkt -> header.src_nodeID, rup -> entry[i].nodeID, rup -> entry[i].cost);
+
+	//calculate new distance vector of host node
+	for (i = 0; i < node_num; ++i){
+		int dest_node = node_array[i];
+		if(dest_node == host_node)
+			continue;
+		
+		int min_cost = dvtable_getcost(dv, host_node, dest_node);
+		int min_relay_node = -1;
+		for (j = 0; j < nbr_node_num; ++j){
+			int relay_node = nbr_node_array[j];
+			int relay_cost = nbrcosttable_getcost(nct, relay_node) + dvtable_getcost(dv, relay_node, dest_node);
+			if(relay_cost < min_cost){
+				min_cost = relay_cost;
+				min_relay_node = relay_node;
+			}
+		}
+		//find new relay node, add it into routing table
+		if(min_relay_node != -1){
+			dvtable_setcost(dv, host_node, dest_node, min_cost);
+			routingtable_setnextnode(routingtable, dest_node, min_relay_node);
+		}
+	}
+}
+
+
 
 //这个线程处理来自SON进程的进入报文. 它通过调用son_recvpkt()接收来自SON进程的报文.
 //如果报文是SIP报文,并且目的节点就是本节点,就转发报文给STCP进程. 如果目的节点不是本节点,
@@ -115,33 +149,23 @@ void* routeupdate_daemon(void* arg) {
 void* pkthandler(void* arg) {
 	
 	sip_pkt_t pkt;
-	memset(&pkt, 0, sizeof(sip_pkt_t));
+	
 
+	memset(&pkt, 0, sizeof(sip_pkt_t));
 	while(son_recvpkt(&pkt, son_conn) > 0) {
 
 		printf("get a packet from %d, to %d, ", pkt.header.src_nodeID, pkt.header.dest_nodeID);
 
 		// route update packet
 		if (pkt.header.type == ROUTE_UPDATE){
-		
-			pkt_routeupdate_t *packet_route_uptate = (pkt_routeupdate_t *)((char *)(&pkt) + SIP_HEADER_LEN);
-			
 			printf("it's a route update packet.\n");
-			/*
-			printf("Routing: received a route update packet from neighbor %d\n", pkt.header.src_nodeID);
-			printf("====================\n");
-			printf("entryNum:\t%d\n", packet_route_uptate -> entryNum);
-			int i;
-			for (i = 0; i < packet_route_uptate -> entryNum; i++) {
-				printf("nodeID:\t\t%d\n", packet_route_uptate -> entry[i].nodeID);
-				printf("cost:\t\t%d\n", packet_route_uptate -> entry[i].cost);
-			}
-			printf("====================\n");*/
+			route_update(&pkt);
 		}
 
+		//sip data packet
 		if (pkt.header.type == SIP){
-		
 			printf("it's a sip packet.\n");
+
 		}
 	}
 
@@ -168,7 +192,6 @@ void sip_stop() {
 //接收的段被封装进数据报(一个段在一个数据报中), 然后使用son_sendpkt发送该报文到下一跳. 下一跳节点ID提取自路由表.
 //当本地STCP进程断开连接时, 这个函数等待下一个STCP进程的连接. // ?
 void waitSTCP() {
-
 
 	int listenfd = socket(AF_INET, SOCK_STREAM, 0);
 	struct sockaddr_in server_addr, client_addr;
@@ -206,6 +229,8 @@ int main(int argc, char *argv[]) {
 	routingtable = routingtable_create();
 	routingtable_mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
 	pthread_mutex_init(routingtable_mutex,NULL);
+
+	host_node = topology_getMyNodeID();
 	
 	son_conn = -1;
 	stcp_conn = -1;
@@ -235,7 +260,8 @@ int main(int argc, char *argv[]) {
 	printf("SIP layer is started...\n");
 	printf("waiting for routes to be established\n");
 	sleep(SIP_WAITTIME);
-	//routingtable_print(routingtable);
+	routingtable_print(routingtable);
+	dvtable_print(dv);
 
 	//等待来自STCP进程的连接
 	printf("waiting for connection from STCP process\n");

@@ -137,9 +137,11 @@ void routingtable_print(routingtable_t* routingtable){
 	printf("==========================================\n");
 }
 
+/*
 int main(int argc, char const *argv[])
 {
 	printf("test main\n");
 	routingtable_print(routingtable_create());
 	return 0;
 }
+*/
