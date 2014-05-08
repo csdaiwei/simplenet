@@ -32,7 +32,7 @@
 #define LOACLHOST "127.0.0.1"
 
 //SIP层等待这段时间让SIP路由协议建立路由路径. 
-#define SIP_WAITTIME 20
+#define SIP_WAITTIME 11
 
 /**************************************************************/
 //声明全局变量
@@ -95,7 +95,7 @@ void* routeupdate_daemon(void* arg) {
 		if (connd == -1)
 			break;
 
-		printf("Routing: broadcast a route update packet to all neighbors\n");
+		//printf("Routing: broadcast a route update packet to all neighbors\n");
 
 		sleep(ROUTEUPDATE_INTERVAL);
 	}
@@ -150,28 +150,38 @@ void* pkthandler(void* arg) {
 	
 	sip_pkt_t pkt;
 	
-
 	memset(&pkt, 0, sizeof(sip_pkt_t));
 	while(son_recvpkt(&pkt, son_conn) > 0) {
 
-		printf("get a packet from %d, to %d, ", pkt.header.src_nodeID, pkt.header.dest_nodeID);
-
 		// route update packet
 		if (pkt.header.type == ROUTE_UPDATE){
-			printf("it's a route update packet.\n");
 			route_update(&pkt);
 		}
 
 		//sip data packet
 		if (pkt.header.type == SIP){
-			printf("it's a sip packet.\n");
 
+			printf("get a sip packet from %d, to %d ", pkt.header.src_nodeID, pkt.header.dest_nodeID);
+			
+			if(pkt.header.dest_nodeID == host_node){
+				int result = forwardsegToSTCP(stcp_conn, pkt.header.src_nodeID, (seg_t*)pkt.data);
+				printf("forward it to local stcp, result %d\n", result);
+			}
+			else{
+				int nextNodeID = routingtable_getnextnode(routingtable, pkt.header.dest_nodeID);
+				if(nextNodeID != -1){
+					int result = son_sendpkt(nextNodeID, &pkt, son_conn);
+					printf("forward it to node %d, result %d\n", nextNodeID, result);
+				}
+			}
 		}
 	}
 
-	close(son_conn);
-	son_conn = -1;
-	pthread_exit(NULL);
+	printf("pkthandler stop\n");
+
+	//close(son_conn);
+	//son_conn = -1;
+	//pthread_exit(NULL);
 }
 
 //这个函数终止SIP进程, 当SIP进程收到信号SIGINT时会调用这个函数. 
@@ -193,28 +203,49 @@ void sip_stop() {
 //当本地STCP进程断开连接时, 这个函数等待下一个STCP进程的连接. // ?
 void waitSTCP() {
 
-	int listenfd = socket(AF_INET, SOCK_STREAM, 0);
 	struct sockaddr_in server_addr, client_addr;
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	server_addr.sin_port = htons(SIP_PORT);
 
-	bind(listenfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
-	listen(listenfd, MAX_NODE_NUM);
-	const int on = 1;
-	setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+	while(true){
+		
+		int listenfd = socket(AF_INET, SOCK_STREAM, 0);
+		
+		bind(listenfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+		listen(listenfd, MAX_NODE_NUM);
+		const int on = 1;
+		setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
 
-	socklen_t client_len = sizeof(client_addr);
-	stcp_conn = accept(listenfd, (struct sockaddr *)&client_addr, &client_len);
-	close(listenfd);
-	printf("STCP has connected to local SIP network\n");
-	
-	while (true) {
+		socklen_t client_len = sizeof(client_addr);
+		stcp_conn = accept(listenfd, (struct sockaddr *)&client_addr, &client_len);
+		close(listenfd);
+		printf("STCP has connected to local SIP network\n");
+		
+		//keep recving segment from stcp
+		int dest_nodeID;
+		seg_t segment;
+		while (getsegToSend(stcp_conn, &dest_nodeID, &segment) == 1) {
 
-		//receive a packet from STCP
-		//getsegToSend...
-		sleep(1);
+			sip_pkt_t pkt;
+			pkt.header.src_nodeID = host_node;
+			pkt.header.dest_nodeID = dest_nodeID;
+			pkt.header.length = sizeof(sip_hdr_t) + sizeof(stcp_hdr_t) + segment.header.length;
+			pkt.header.type = SIP;
+			*((seg_t *)pkt.data) = segment;
+
+			int nextNodeID = routingtable_getnextnode(routingtable, dest_nodeID);
+			//assert(nextNodeID != -1);
+			if(nextNodeID != -1)
+				son_sendpkt(nextNodeID, &pkt, son_conn);
+
+			printf("receive a segment from stcp, dest_nodeID %d, send to node %d\n", dest_nodeID, nextNodeID);
+
+		}
+
+		printf("STCP has disconnected to local SIP network\n");
 	}
+
 
 }
 

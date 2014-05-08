@@ -2,9 +2,28 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <errno.h>
 
 #include "pkt.h"
 #include "bool.h"
+
+int readn(int socket_fd, char *buf, int len, int flag) {
+	int count = len;
+	int read_count;
+	while (count > 0) {
+		read_count = recv(socket_fd, buf, count, flag);
+		if (read_count < 0) {
+			if (errno == EINTR)
+				continue;
+			return -1;
+		}
+		if (read_count == 0)
+			return 0;
+		buf += read_count;
+		count -= read_count;
+	}
+	return len;
+}
 
 /** API for SIP, send a packet to SON network
 	return 1  on success
@@ -35,17 +54,17 @@ int son_recvpkt(sip_pkt_t* pkt, int son_conn) {
 
 	char sign[3];
 	while (true) {
-		if (recv(son_conn, sign, 2, 0) <= 0) 
+		if (readn(son_conn, (char *)sign, 2, 0) <= 0) 
 			return -1;
 		if (strncmp(sign, "!&", 2) == 0) 
 			break;
 	}
 
 	int connd;
-	connd = recv(son_conn, pkt, SIP_HEADER_LEN, 0);
-	connd = recv(son_conn, (char *)pkt + SIP_HEADER_LEN, pkt -> header.length, 0);
+	connd = readn(son_conn, (char *)pkt, SIP_HEADER_LEN, 0);
+	connd = readn(son_conn, (char *)pkt + SIP_HEADER_LEN, pkt -> header.length, 0);
 	
-	connd = recv(son_conn, sign, 2, 0);
+	connd = readn(son_conn, (char *)sign, 2, 0);
 	if (connd <= 0)
 		return -1;
 	if (strncmp(sign, "!#", 2) != 0)
@@ -62,18 +81,18 @@ int getpktToSend(sip_pkt_t* pkt, int* nextNode, int sip_conn) {
 	
 	char sign[3];
 	while (true) {
-		if (recv(sip_conn, sign, 2, 0) <= 0) 
+		if (readn(sip_conn, (char *)sign, 2, 0) <= 0) 
 			return -1;
 		if (strncmp(sign, "!&", 2) == 0) 
 			break;
 	}
 
 	int connd;
-	connd = recv(sip_conn, nextNode, sizeof(int), 0);
-	connd = recv(sip_conn, pkt, SIP_HEADER_LEN, 0);
-	connd = recv(sip_conn, (char *)pkt + SIP_HEADER_LEN, pkt -> header.length, 0);
+	connd = readn(sip_conn, (char *)nextNode, sizeof(int), 0);
+	connd = readn(sip_conn, (char *)pkt, SIP_HEADER_LEN, 0);
+	connd = readn(sip_conn, (char *)pkt + SIP_HEADER_LEN, pkt -> header.length, 0);
 
-	connd = recv(sip_conn, sign, 2, 0);
+	connd = readn(sip_conn, (char *)sign, 2, 0);
 	if (connd <= 0)
 		return -1;
 	if (strncmp(sign, "!#", 2) != 0)
@@ -124,17 +143,17 @@ int recvpkt(sip_pkt_t* pkt, int conn) {
 
 	char sign[3];
 	while (true) {
-		if (recv(conn, sign, 2, 0) <= 0) 
+		if (readn(conn, (char *)sign, 2, 0) <= 0) 
 			return -1;
 		if (strncmp(sign, "!&", 2) == 0) 
 			break;
 	}
 
 	int connd;
-	connd = recv(conn, pkt, SIP_HEADER_LEN, 0);
-	connd = recv(conn, (char *)pkt + SIP_HEADER_LEN, pkt -> header.length, 0);
+	connd = readn(conn, (char *)pkt, SIP_HEADER_LEN, 0);
+	connd = readn(conn, (char *)pkt + SIP_HEADER_LEN, pkt -> header.length, 0);
 	
-	connd = recv(conn, sign, 2, 0);
+	connd = readn(conn, (char *)sign, 2, 0);
 	if (connd <= 0)
 		return -1;
 	if (strncmp(sign, "!#", 2) != 0)

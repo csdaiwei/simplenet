@@ -98,4 +98,7 @@ void* seghandler(void* arg);
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //
 
+
+void build_segment_head(seg_t* segment, int src_port, int dest_port, int length, int type);
+
 #endif

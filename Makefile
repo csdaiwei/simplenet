@@ -19,14 +19,14 @@ sip/routingtable.o: sip/routingtable.c
 	gcc $(CFLAGS) -c sip/routingtable.c -o sip/routingtable.o
 sip/sip: common/pkt.o common/seg.o topology/topology.o sip/nbrcosttable.o sip/dvtable.o sip/routingtable.o sip/sip.c 
 	gcc $(CFLAGS) -pthread sip/nbrcosttable.o sip/dvtable.o sip/routingtable.o common/pkt.o common/seg.o topology/topology.o sip/sip.c -o sip/sip 
-client/app_simple_client: client/app_simple_client.c common/seg.o client/stcp_client.o topology/topology.o 
-	gcc $(CFLAGS) -pthread client/app_simple_client.c common/seg.o client/stcp_client.o topology/topology.o -o client/app_simple_client 
-client/app_stress_client: client/app_stress_client.c common/seg.o client/stcp_client.o topology/topology.o 
-	gcc $(CFLAGS) -pthread client/app_stress_client.c common/seg.o client/stcp_client.o topology/topology.o -o client/app_stress_client 
-server/app_simple_server: server/app_simple_server.c common/seg.o server/stcp_server.o topology/topology.o 
-	gcc $(CFLAGS) -pthread server/app_simple_server.c common/seg.o server/stcp_server.o topology/topology.o -o server/app_simple_server
-server/app_stress_server: server/app_stress_server.c common/seg.o server/stcp_server.o topology/topology.o 
-	gcc $(CFLAGS) -pthread server/app_stress_server.c common/seg.o server/stcp_server.o topology/topology.o -o server/app_stress_server
+client/app_simple_client: client/app_simple_client.c common/seg.o common/pkt.o client/stcp_client.o topology/topology.o 
+	gcc $(CFLAGS) -pthread client/app_simple_client.c common/seg.o common/pkt.o client/stcp_client.o topology/topology.o -o client/app_simple_client 
+client/app_stress_client: client/app_stress_client.c common/seg.o common/pkt.o client/stcp_client.o topology/topology.o 
+	gcc $(CFLAGS) -pthread client/app_stress_client.c common/seg.o common/pkt.o client/stcp_client.o topology/topology.o -o client/app_stress_client 
+server/app_simple_server: server/app_simple_server.c common/seg.o common/pkt.o server/stcp_server.o topology/topology.o 
+	gcc $(CFLAGS) -pthread server/app_simple_server.c common/seg.o common/pkt.o server/stcp_server.o topology/topology.o -o server/app_simple_server
+server/app_stress_server: server/app_stress_server.c common/seg.o common/pkt.o server/stcp_server.o topology/topology.o 
+	gcc $(CFLAGS) -pthread server/app_stress_server.c common/seg.o common/pkt.o server/stcp_server.o topology/topology.o -o server/app_stress_server
 common/seg.o: common/seg.c common/seg.h
 	gcc $(CFLAGS) -c common/seg.c -o common/seg.o
 client/stcp_client.o: client/stcp_client.c client/stcp_client.h 

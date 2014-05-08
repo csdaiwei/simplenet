@@ -8,42 +8,22 @@
 #include "seg.h"
 #include "bool.h"
 
-int readn(int socket_fd, char *buf, int len, int flag) {
-	int count = len;
-	int read_count;
-	while (count > 0) {
-		read_count = recv(socket_fd, buf, count, flag);
-		if (read_count < 0) {
-			if (errno == EINTR)
-				continue;
-			return -1;
-		}
-		if (read_count == 0)
-			return 0;
-		buf += read_count;
-		count -= read_count;
-	}
-	return len;
-}
+int readn(int socket_fd, char *buf, int len, int flag);
 
 //STCP进程使用这个函数发送sendseg_arg_t结构(包含段及其目的节点ID)给SIP进程.
 //参数sip_conn是在STCP进程和SIP进程之间连接的TCP描述符.
 //如果sendseg_arg_t发送成功,就返回1,否则返回-1.
-int sip_sendseg(int sip_conn, int dest_nodeID, seg_t* segPtr)
-{
-	/*
-    int connection_state;
-	connection_state = send(connection, "!&", 2, 0);
-	if (connection_state <= 0) return -1;
+int sip_sendseg(int sip_conn, int dest_nodeID, seg_t* segPtr){
 	
 	segPtr -> header.checksum = checksum(segPtr);
 
-	connection_state = send(connection, segPtr, segPtr -> header.length + SEG_HEAD_LEN, 0);
-	if (connection_state <= 0) return -1;
-	
-	connection_state = send(connection, "!#", 2, 0);
-	if (connection_state <= 0) return -1;
-	return 1;*/
+	sendseg_arg_t ssa;
+	ssa.nodeID = dest_nodeID;
+	ssa.seg = *(segPtr);
+
+	if(send(sip_conn, &ssa, sizeof(sendseg_arg_t), 0) <= 0)
+		return -1;
+	return 1;
 }
 
 //STCP进程使用这个函数来接收来自SIP进程的包含段及其源节点ID的sendseg_arg_t结构.
@@ -52,56 +32,47 @@ int sip_sendseg(int sip_conn, int dest_nodeID, seg_t* segPtr)
 //如果成功接收到sendseg_arg_t就返回1, 否则返回-1.
 int sip_recvseg(int sip_conn, int* src_nodeID, seg_t* segPtr)
 {
-  	
-  	/*int connection_state;
-	char recv_begin[2];
-	char recv_end[2];
-	//receive the begin "!&"
-	while (true) {
-		connection_state = readn(connection, recv_begin, 2, 0);
-		if (strncmp(recv_begin, "!&", 2) == 0)
-			break;
-		if (connection_state <= 0) return -1;
-	}
-	
-	//receive the segment header
-	connection_state = readn(connection, (char *)segPtr, SEG_HEAD_LEN, 0);
-	if (connection_state <= 0) return -1;
-	//receive the segment data	
-	if (segPtr -> header.length != 0) {
-		connection_state = readn(connection, (char *)segPtr + SEG_HEAD_LEN, segPtr -> header.length, 0);
-		if (connection_state <= 0) return -1;
-	}
-	//receive the end "!#"
-	connection_state = readn(connection, recv_end, 2, 0);
-	if (connection_state <= 0) return -1;
-	if (strncmp(recv_end, "!#", 0) != 0) return -1;
+  	sendseg_arg_t ssa;
+	if(readn(sip_conn, (char *)&ssa, sizeof(sendseg_arg_t), 0) <= 0)
+		return -1;
+	*src_nodeID = ssa.nodeID;
+	*segPtr = ssa.seg;
 
-
-	int is_lost = seglost(segPtr);	//1 means lost
-
+	int is_lost = seglost(segPtr);	//1 means lost, 0 ok
 	if(is_lost == 0 && checkchecksum(segPtr) != 1){	
 		is_lost = 1;//checksum failed, set lost.
 		printf("checkchecksum failed\n");
 	}
 
-	return is_lost;*/
+	return (is_lost == 0) ? 1: -1;
 }
 
 //SIP进程使用这个函数接收来自STCP进程的包含段及其目的节点ID的sendseg_arg_t结构.
 //参数stcp_conn是在STCP进程和SIP进程之间连接的TCP描述符.
 //如果成功接收到sendseg_arg_t就返回1, 否则返回-1.
-int getsegToSend(int stcp_conn, int* dest_nodeID, seg_t* segPtr)
-{
-  return 0;
+int getsegToSend(int stcp_conn, int* dest_nodeID, seg_t* segPtr){
+
+	sendseg_arg_t ssa;
+	if(readn(stcp_conn, (char *)&ssa, sizeof(sendseg_arg_t), 0) <= 0)
+		return -1;
+	*dest_nodeID = ssa.nodeID;
+	*segPtr = ssa.seg;
+
+  	return 1;
 }
 
 //SIP进程使用这个函数发送包含段及其源节点ID的sendseg_arg_t结构给STCP进程.
 //参数stcp_conn是STCP进程和SIP进程之间连接的TCP描述符.
 //如果sendseg_arg_t被成功发送就返回1, 否则返回-1.
-int forwardsegToSTCP(int stcp_conn, int src_nodeID, seg_t* segPtr)
-{
-  return 0;
+int forwardsegToSTCP(int stcp_conn, int src_nodeID, seg_t* segPtr){
+
+	sendseg_arg_t ssa;
+	ssa.nodeID = src_nodeID;
+	ssa.seg = *(segPtr);
+	
+	if(send(stcp_conn, &ssa, sizeof(sendseg_arg_t), 0) <= 0)
+		return -1;
+	return 1;
 }
 
 // 一个段有PKT_LOST_RATE/2的可能性丢失, 或PKT_LOST_RATE/2的可能性有着错误的校验和.

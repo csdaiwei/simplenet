@@ -40,14 +40,26 @@
 int connectToSIP() {
 
 	//你需要编写这里的代码.
-	
+	int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+	struct sockaddr_in local_server;
+	memset(&local_server, 0, sizeof(local_server));
+	local_server.sin_family = AF_INET;
+	local_server.sin_addr.s_addr = inet_addr("127.0.0.1");
+	local_server.sin_port = htons(SIP_PORT);
+
+	int connd = connect(socket_fd, (struct sockaddr *)&local_server, sizeof(local_server));
+	if (connd < 0)
+		return -1;
+
+	return socket_fd;
 }
 
 //这个函数断开到本地SIP进程的TCP连接. 
 void disconnectToSIP(int sip_conn) {
 
 	//你需要编写这里的代码.
-	
+	close(sip_conn);
+	exit(0);
 }
 
 int main() {

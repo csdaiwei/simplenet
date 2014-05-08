@@ -1,15 +1,15 @@
-//文件名: server/app_stress_server.c
+//脦脛录镁脙没: server/app_stress_server.c
 
-//描述: 这是压力测试版本的服务器程序代码. 服务器首先连接到本地SIP进程. 然后它调用stcp_server_init()初始化STCP服务器.
-//它通过调用stcp_server_sock()和stcp_server_accept()创建套接字并等待来自客户端的连接. 它然后接收文件长度. 
-//在这之后, 它创建一个缓冲区, 接收文件数据并将它保存到receivedtext.txt文件中.
-//最后, 服务器通过调用stcp_server_close()关闭套接字, 并断开与本地SIP进程的连接.
+//脙猫脢枚: 脮芒脢脟脩鹿脕娄虏芒脢脭掳忙卤戮碌脛路镁脦帽脝梅鲁脤脨貌麓煤脗毛. 路镁脦帽脝梅脢脳脧脠脕卢陆脫碌陆卤戮碌脴SIP陆酶鲁脤. 脠禄潞贸脣眉碌梅脫脙stcp_server_init()鲁玫脢录禄炉STCP路镁脦帽脝梅.
+//脣眉脥篓鹿媒碌梅脫脙stcp_server_sock()潞脥stcp_server_accept()麓麓陆篓脤脳陆脫脳脰虏垄碌脠麓媒脌麓脳脭驴脥禄搂露脣碌脛脕卢陆脫. 脣眉脠禄潞贸陆脫脢脮脦脛录镁鲁陇露脠. 
+//脭脷脮芒脰庐潞贸, 脣眉麓麓陆篓脪禄赂枚禄潞鲁氓脟酶, 陆脫脢脮脦脛录镁脢媒戮脻虏垄陆芦脣眉卤拢麓忙碌陆receivedtext.txt脦脛录镁脰脨.
+//脳卯潞贸, 路镁脦帽脝梅脥篓鹿媒碌梅脫脙stcp_server_close()鹿脴卤脮脤脳陆脫脳脰, 虏垄露脧驴陋脫毛卤戮碌脴SIP陆酶鲁脤碌脛脕卢陆脫.
 
-//创建日期: 2013年1月
+//麓麓陆篓脠脮脝脷: 2013脛锚1脭脗
 
-//输入: 无
+//脢盲脠毛: 脦脼
 
-//输出: STCP服务器状态
+//脢盲鲁枚: STCP路镁脦帽脝梅脳麓脤卢
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -25,70 +25,82 @@
 #include "../common/constants.h"
 #include "stcp_server.h"
 
-//创建一个连接, 使用客户端端口号87和服务器端口号88. 
+//麓麓陆篓脪禄赂枚脕卢陆脫, 脢鹿脫脙驴脥禄搂露脣露脣驴脷潞脜87潞脥路镁脦帽脝梅露脣驴脷潞脜88. 
 #define CLIENTPORT1 87
 #define SERVERPORT1 88
-//在接收的文件数据被保存后, 服务器等待15秒, 然后关闭连接.
+//脭脷陆脫脢脮碌脛脦脛录镁脢媒戮脻卤禄卤拢麓忙潞贸, 路镁脦帽脝梅碌脠麓媒15脙毛, 脠禄潞贸鹿脴卤脮脕卢陆脫.
 #define WAITTIME 15
 
-//这个函数连接到本地SIP进程的端口SIP_PORT. 如果TCP连接失败, 返回-1. 连接成功, 返回TCP套接字描述符, STCP将使用该描述符发送段.
+//杩欎釜鍑芥暟杩炴帴鍒版湰鍦癝IP杩涚▼鐨勭鍙IP_PORT. 濡傛灉TCP杩炴帴澶辫触, 杩斿洖-1. 杩炴帴鎴愬姛, 杩斿洖TCP濂楁帴瀛楁弿杩扮, STCP灏嗕娇鐢ㄨ鎻忚堪绗﹀彂閫佹.
 int connectToSIP() {
 
-	//你需要编写这里的代码.
-	
+	//浣犻渶瑕佺紪鍐欒繖閲岀殑浠ｇ爜.
+	int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+	struct sockaddr_in local_server;
+	memset(&local_server, 0, sizeof(local_server));
+	local_server.sin_family = AF_INET;
+	local_server.sin_addr.s_addr = inet_addr("127.0.0.1");
+	local_server.sin_port = htons(SIP_PORT);
+
+	int connd = connect(socket_fd, (struct sockaddr *)&local_server, sizeof(local_server));
+	if (connd < 0)
+		return -1;
+
+	return socket_fd;
 }
 
-//这个函数断开到本地SIP进程的TCP连接. 
+//杩欎釜鍑芥暟鏂紑鍒版湰鍦癝IP杩涚▼鐨凾CP杩炴帴. 
 void disconnectToSIP(int sip_conn) {
 
-	//你需要编写这里的代码.
-	
+	//浣犻渶瑕佺紪鍐欒繖閲岀殑浠ｇ爜.
+	close(sip_conn);
+	exit(0);
 }
 
 int main() {
-	//用于丢包率的随机数种子
+	//脫脙脫脷露陋掳眉脗脢碌脛脣忙禄煤脢媒脰脰脳脫
 	srand(time(NULL));
 
-	//连接到SIP进程并获得TCP套接字描述符
+	//脕卢陆脫碌陆SIP陆酶鲁脤虏垄禄帽碌脙TCP脤脳陆脫脳脰脙猫脢枚路没
 	int sip_conn = connectToSIP();
 	if(sip_conn<0) {
 		printf("can not connect to the local SIP process\n");
 	}
 
-	//初始化STCP服务器
+	//鲁玫脢录禄炉STCP路镁脦帽脝梅
 	stcp_server_init(sip_conn);
 
-	//在端口SERVERPORT1上创建STCP服务器套接字 
+	//脭脷露脣驴脷SERVERPORT1脡脧麓麓陆篓STCP路镁脦帽脝梅脤脳陆脫脳脰 
 	int sockfd= stcp_server_sock(SERVERPORT1);
 	if(sockfd<0) {
 		printf("can't create stcp server\n");
 		exit(1);
 	}
-	//监听并接受来自STCP客户端的连接 
+	//录脿脤媒虏垄陆脫脢脺脌麓脳脭STCP驴脥禄搂露脣碌脛脕卢陆脫 
 	stcp_server_accept(sockfd);
 
-	//首先接收文件长度, 然后接收文件数据
+	//脢脳脧脠陆脫脢脮脦脛录镁鲁陇露脠, 脠禄潞贸陆脫脢脮脦脛录镁脢媒戮脻
 	int fileLen;
 	stcp_server_recv(sockfd,&fileLen,sizeof(int));
 	char* buf = (char*) malloc(fileLen);
 	stcp_server_recv(sockfd,buf,fileLen);
 
-	//将接收到的文件数据保存到文件receivedtext.txt中
+	//陆芦陆脫脢脮碌陆碌脛脦脛录镁脢媒戮脻卤拢麓忙碌陆脦脛录镁receivedtext.txt脰脨
 	FILE* f;
 	f = fopen("receivedtext.txt","a");
 	fwrite(buf,fileLen,1,f);
 	fclose(f);
 	free(buf);
 
-	//等待一会儿
+	//碌脠麓媒脪禄禄谩露霉
 	sleep(WAITTIME);
 
-	//关闭STCP服务器 
+	//鹿脴卤脮STCP路镁脦帽脝梅 
 	if(stcp_server_close(sockfd)<0) {
 		printf("can't destroy stcp server\n");
 		exit(1);
 	}				
 
-	//断开与SIP进程之间的连接
+	//露脧驴陋脫毛SIP陆酶鲁脤脰庐录盲碌脛脕卢陆脫
 	disconnectToSIP(sip_conn);
 }

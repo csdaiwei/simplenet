@@ -1,5 +1,5 @@
-server/*.txt
 client/*.txt
+server/*.txt
 
 common/*.o
 topology/*.o

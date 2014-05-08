@@ -127,4 +127,8 @@ void* sendBuf_timer(void* clienttcb);
 // 当超时事件发生时, 重新发送所有已发送但未被确认段. 当发送缓冲区为空时, 这个线程将终止.
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
+
+void build_segment_head(seg_t* segment, int src_port, int dest_port, int length, int type);
+
 #endif
