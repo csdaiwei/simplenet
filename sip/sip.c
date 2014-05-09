@@ -163,8 +163,10 @@ void* pkthandler(void* arg) {
 			printf("get a sip packet from %d, to %d ", pkt.header.src_nodeID, pkt.header.dest_nodeID);
 			
 			if(pkt.header.dest_nodeID == host_node){
-				int result = forwardsegToSTCP(stcp_conn, pkt.header.src_nodeID, (seg_t*)pkt.data);
-				printf("forward it to local stcp, result %d\n", result);
+				if (stcp_conn != -1) {
+					int result = forwardsegToSTCP(stcp_conn, pkt.header.src_nodeID, (seg_t*)pkt.data);
+					printf("forward it to local stcp, result %d\n", result);
+				}
 			}
 			else{
 				int nextNodeID = routingtable_getnextnode(routingtable, pkt.header.dest_nodeID);
@@ -190,7 +192,6 @@ void sip_stop() {
 	
 	close(son_conn);
 	exit(0);
-	return;
 }
 
 //这个函数打开端口SIP_PORT并等待来自本地STCP进程的TCP连接.
@@ -236,6 +237,7 @@ void waitSTCP() {
 			printf("receive a segment from stcp, dest_nodeID %d, send to node %d\n", dest_nodeID, nextNodeID);
 		}
 		printf("STCP has disconnected to local SIP network\n");
+		stcp_conn = -1;
 	}
 }
 

@@ -117,13 +117,14 @@ void* listen_to_neighbor(void* arg) {
 		
 		if (nt == NULL)
 			return NULL;
-		
+
 		//sip_pkt_t *recv_packet = (sip_pkt_t *)malloc(sizeof(sip_pkt_t));
 		sip_pkt_t recv_packet;
 		int connd = recvpkt(&recv_packet, neighbor_entry -> conn);
 		if (connd == -1)
 			return NULL;
-		forwardpktToSIP(&recv_packet, sip_conn);
+		if (sip_conn != -1)
+			forwardpktToSIP(&recv_packet, sip_conn);
 	}
 }
 
@@ -143,26 +144,27 @@ void waitSIP() {
 	setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
 
 	socklen_t client_len = sizeof(client_addr);
-	sip_conn = accept(listenfd, (struct sockaddr *)&client_addr, &client_len);
-	close(listenfd);
-	printf("SIP has connected to local SON network\n");
-	
 	while (true) {
+		sip_conn = accept(listenfd, (struct sockaddr *)&client_addr, &client_len);
+		printf("SIP has connected to local SON network\n");
+	
+		while (true) {
 		//receive a packet from SIP
-		int next_node_id;
-		sip_pkt_t send_packet;
-		int connd = getpktToSend(&send_packet, &next_node_id, sip_conn);
-		if (connd == -1) {
-			son_stop();
-		}
-
-		//send the packet to neighbors
-		nbr_entry_t *neighbor_entry = nt;
-		int i;
-		for (i = 0; i < nbr_entry_num; i ++) {
-			if (next_node_id == BROADCAST_NODEID || next_node_id == neighbor_entry -> nodeID)
-				sendpkt(&send_packet, neighbor_entry -> conn);
-			neighbor_entry ++;
+			int next_node_id;
+			sip_pkt_t send_packet;
+			int connd = getpktToSend(&send_packet, &next_node_id, sip_conn);
+			if (connd == -1) {
+				sip_conn = -1;
+				break;		
+			}
+			//send the packet to neighbors
+			nbr_entry_t *neighbor_entry = nt;
+			int i;
+			for (i = 0; i < nbr_entry_num; i ++) {
+				if (next_node_id == BROADCAST_NODEID || next_node_id == neighbor_entry -> nodeID)
+					sendpkt(&send_packet, neighbor_entry -> conn);
+				neighbor_entry ++;
+			}
 		}
 	}
 }
