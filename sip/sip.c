@@ -79,18 +79,22 @@ void* routeupdate_daemon(void* arg) {
 	
 	//use a routeupdate packet as the distance vector of the source node
 	pkt_routeupdate_t packet_route_uptate;
-	packet_route_uptate.entryNum = topology_getNodeNum();
-	int* node_array = topology_getNodeArray();
 	int i;
-	for (i = 0; i < packet_route_uptate.entryNum; i ++) {
-		packet_route_uptate.entry[i].nodeID = node_array[i];
-		packet_route_uptate.entry[i].cost = dvtable_getcost(dv, host_node, node_array[i]);
-	}
-	sip_packet.header.length = sizeof(unsigned int) * (2 * packet_route_uptate.entryNum + 1);
-	memcpy(sip_packet.data, &packet_route_uptate, sip_packet.header.length);
-
 	int connd;
+	
 	while (true) {
+
+		memset(&packet_route_uptate, 0, sizeof(pkt_routeupdate_t));
+		packet_route_uptate.entryNum = topology_getNodeNum();
+		int* node_array = topology_getNodeArray();
+		
+		for (i = 0; i < packet_route_uptate.entryNum; i ++) {
+			packet_route_uptate.entry[i].nodeID = node_array[i];
+			packet_route_uptate.entry[i].cost = dvtable_getcost(dv, host_node, node_array[i]);
+		}
+		sip_packet.header.length = sizeof(unsigned int) * (2 * packet_route_uptate.entryNum + 1);
+		memcpy(sip_packet.data, &packet_route_uptate, sip_packet.header.length);
+
 		connd = son_sendpkt(BROADCAST_NODEID, &sip_packet, son_conn);
 		if (connd == -1)
 			break;

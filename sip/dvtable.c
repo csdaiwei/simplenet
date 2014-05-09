@@ -91,6 +91,7 @@ unsigned int dvtable_getcost(dv_t* dvtable, int fromNodeID, int toNodeID)
 	int dv_num = topology_getNbrNum() + 1;
 	int node_num = topology_getNodeNum();
 
+
 	for (i = 0; i < dv_num; ++i)
 		if(dvtable[i].nodeID == fromNodeID)
 			break;
@@ -102,6 +103,9 @@ unsigned int dvtable_getcost(dv_t* dvtable, int fromNodeID, int toNodeID)
 			break;
 	if (j == node_num)
 		return INFINITE_COST;
+
+	//if(fromNodeID == 129 && toNodeID == 130)
+	//	printf("get cost from %d to %d, cost %d\n", fromNodeID, toNodeID, dvtable[i].dvEntry[j].cost);
 
 	return dvtable[i].dvEntry[j].cost;
 }
