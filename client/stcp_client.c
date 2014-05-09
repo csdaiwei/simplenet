@@ -151,8 +151,6 @@ int stcp_client_send(int sockfd, void* data, unsigned int length)
 
 	tcb -> next_seqNum += real_length;
 
-	
-
 	/*add to send buf list*/
 	pthread_mutex_lock(tcb -> bufMutex);
 
@@ -342,7 +340,7 @@ void* seghandler(void* arg)
 					
 					tcb -> sendBufHead = tcb -> sendBufHead -> next;
 					
-					printf("free segment in buf, seq %d\n", bufhead -> seg.header.seq_num);
+				//	printf("free segment in buf, seq %d\n", bufhead -> seg.header.seq_num);
 					free(bufhead);
 
 					bufhead = tcb -> sendBufHead;
@@ -391,7 +389,7 @@ void* sendBuf_timer(void* clienttcb)
 
 		if((currTime - sentTime) * 100000 > DATA_TIMEOUT){
 
-			printf("data segment timeout, seq %d\n", (tcb -> sendBufHead -> seg).header.seq_num);
+			//printf("data segment timeout, seq %d\n", (tcb -> sendBufHead -> seg).header.seq_num);
 			
 			pthread_mutex_lock(tcb -> bufMutex);
 			segBuf_t* resent_segBuf = tcb -> sendBufHead;
@@ -401,7 +399,7 @@ void* sendBuf_timer(void* clienttcb)
 				
 				assert(resent_segBuf != NULL);
 				sip_sendseg(sip_conn, tcb -> server_nodeID, &(resent_segBuf -> seg));
-				printf("resend the data segment, seq %d\n", (resent_segBuf -> seg). header.seq_num);
+		//		printf("resend the data segment, seq %d\n", (resent_segBuf -> seg). header.seq_num);
 
 				resent_segBuf -> sentTime = get_time();
 				resent_segBuf = resent_segBuf -> next;

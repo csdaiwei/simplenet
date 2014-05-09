@@ -50,4 +50,5 @@ clean:
 	rm -rf server/receivedtext.txt
 	rm -rf sip/sip.dSYM
 	rm -rf son/son.dSYM
-
+	rm -rf client/*.dSYM
+	rm -rf server/*.dSYM

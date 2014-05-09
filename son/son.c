@@ -118,12 +118,12 @@ void* listen_to_neighbor(void* arg) {
 		if (nt == NULL)
 			return NULL;
 		
-		sip_pkt_t *recv_packet = (sip_pkt_t *)malloc(sizeof(sip_pkt_t));
-
-		int connd = recvpkt(recv_packet, neighbor_entry -> conn);
+		//sip_pkt_t *recv_packet = (sip_pkt_t *)malloc(sizeof(sip_pkt_t));
+		sip_pkt_t recv_packet;
+		int connd = recvpkt(&recv_packet, neighbor_entry -> conn);
 		if (connd == -1)
 			return NULL;
-		forwardpktToSIP(recv_packet, sip_conn);
+		forwardpktToSIP(&recv_packet, sip_conn);
 	}
 }
 
@@ -150,8 +150,8 @@ void waitSIP() {
 	while (true) {
 		//receive a packet from SIP
 		int next_node_id;
-		sip_pkt_t *send_packet = (sip_pkt_t *)malloc(sizeof(sip_pkt_t));
-		int connd = getpktToSend(send_packet, &next_node_id, sip_conn);
+		sip_pkt_t send_packet;
+		int connd = getpktToSend(&send_packet, &next_node_id, sip_conn);
 		if (connd == -1) {
 			son_stop();
 		}
@@ -161,7 +161,7 @@ void waitSIP() {
 		int i;
 		for (i = 0; i < nbr_entry_num; i ++) {
 			if (next_node_id == BROADCAST_NODEID || next_node_id == neighbor_entry -> nodeID)
-				sendpkt(send_packet, neighbor_entry -> conn);
+				sendpkt(&send_packet, neighbor_entry -> conn);
 			neighbor_entry ++;
 		}
 	}

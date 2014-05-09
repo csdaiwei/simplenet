@@ -1,8 +1,8 @@
-//ÎÄ¼þÃû: server/stcp_server.c
+//æ–‡ä»¶å: server/stcp_server.c
 //
-//ÃèÊö: Õâ¸öÎÄ¼þ°üº¬STCP·þÎñÆ÷½Ó¿ÚÊµÏÖ. 
+//æè¿°: è¿™ä¸ªæ–‡ä»¶åŒ…å«STCPæœåŠ¡å™¨æŽ¥å£å®žçŽ°. 
 //
-//´´½¨ÈÕÆÚ: 2013Äê1ÔÂ
+//åˆ›å»ºæ—¥æœŸ: 2013å¹´1æœˆ
 
 #include <stdlib.h>
 #include <string.h>
@@ -19,20 +19,20 @@
 #include "../common/constants.h"
 #include "../common/bool.h"
 
-//ÉùÃ÷tcbtableÎªÈ«¾Ö±äÁ¿
+//å£°æ˜Žtcbtableä¸ºå…¨å±€å˜é‡
 server_tcb_t* server_tcb_table[MAX_TRANSPORT_CONNECTIONS];
-//ÉùÃ÷µ½SIP½ø³ÌµÄÁ¬½ÓÎªÈ«¾Ö±äÁ¿
+//å£°æ˜Žåˆ°SIPè¿›ç¨‹çš„è¿žæŽ¥ä¸ºå…¨å±€å˜é‡
 int sip_conn;
 
 /*********************************************************************/
 //
-//STCP APIÊµÏÖ
+//STCP APIå®žçŽ°
 //
 /*********************************************************************/
 
-// Õâ¸öº¯Êý³õÊ¼»¯TCB±í, ½«ËùÓÐÌõÄ¿±ê¼ÇÎªNULL. Ëü»¹Õë¶ÔTCPÌ×½Ó×ÖÃèÊö·ûconn³õÊ¼»¯Ò»¸öSTCP²ãµÄÈ«¾Ö±äÁ¿, 
-// ¸Ã±äÁ¿×÷Îªsip_sendsegºÍsip_recvsegµÄÊäÈë²ÎÊý. ×îºó, Õâ¸öº¯ÊýÆô¶¯seghandlerÏß³ÌÀ´´¦Àí½øÈëµÄSTCP¶Î.
-// ·þÎñÆ÷Ö»ÓÐÒ»¸öseghandler.
+// è¿™ä¸ªå‡½æ•°åˆå§‹åŒ–TCBè¡¨, å°†æ‰€æœ‰æ¡ç›®æ ‡è®°ä¸ºNULL. å®ƒè¿˜é’ˆå¯¹TCPå¥—æŽ¥å­—æè¿°ç¬¦connåˆå§‹åŒ–ä¸€ä¸ªSTCPå±‚çš„å…¨å±€å˜é‡, 
+// è¯¥å˜é‡ä½œä¸ºsip_sendsegå’Œsip_recvsegçš„è¾“å…¥å‚æ•°. æœ€åŽ, è¿™ä¸ªå‡½æ•°å¯åŠ¨seghandlerçº¿ç¨‹æ¥å¤„ç†è¿›å…¥çš„STCPæ®µ.
+// æœåŠ¡å™¨åªæœ‰ä¸€ä¸ªseghandler.
 void stcp_server_init(int conn) 
 {
 	pthread_t tid;
@@ -44,10 +44,10 @@ void stcp_server_init(int conn)
 	return;
 }
 
-// Õâ¸öº¯Êý²éÕÒ·þÎñÆ÷TCB±íÒÔÕÒµ½µÚÒ»¸öNULLÌõÄ¿, È»ºóÊ¹ÓÃmalloc()Îª¸ÃÌõÄ¿´´½¨Ò»¸öÐÂµÄTCBÌõÄ¿.
-// ¸ÃTCBÖÐµÄËùÓÐ×Ö¶Î¶¼±»³õÊ¼»¯, ÀýÈç, TCB state±»ÉèÖÃÎªCLOSED, ·þÎñÆ÷¶Ë¿Ú±»ÉèÖÃÎªº¯Êýµ÷ÓÃ²ÎÊýserver_port. 
-// TCB±íÖÐÌõÄ¿µÄË÷ÒýÓ¦×÷Îª·þÎñÆ÷µÄÐÂÌ×½Ó×ÖID±»Õâ¸öº¯Êý·µ»Ø, ËüÓÃÓÚ±êÊ¶·þÎñÆ÷¶ËµÄÁ¬½Ó. 
-// Èç¹ûTCB±íÖÐÃ»ÓÐÌõÄ¿¿ÉÓÃ, Õâ¸öº¯Êý·µ»Ø-1.
+// è¿™ä¸ªå‡½æ•°æŸ¥æ‰¾æœåŠ¡å™¨TCBè¡¨ä»¥æ‰¾åˆ°ç¬¬ä¸€ä¸ªNULLæ¡ç›®, ç„¶åŽä½¿ç”¨malloc()ä¸ºè¯¥æ¡ç›®åˆ›å»ºä¸€ä¸ªæ–°çš„TCBæ¡ç›®.
+// è¯¥TCBä¸­çš„æ‰€æœ‰å­—æ®µéƒ½è¢«åˆå§‹åŒ–, ä¾‹å¦‚, TCB stateè¢«è®¾ç½®ä¸ºCLOSED, æœåŠ¡å™¨ç«¯å£è¢«è®¾ç½®ä¸ºå‡½æ•°è°ƒç”¨å‚æ•°server_port. 
+// TCBè¡¨ä¸­æ¡ç›®çš„ç´¢å¼•åº”ä½œä¸ºæœåŠ¡å™¨çš„æ–°å¥—æŽ¥å­—IDè¢«è¿™ä¸ªå‡½æ•°è¿”å›ž, å®ƒç”¨äºŽæ ‡è¯†æœåŠ¡å™¨ç«¯çš„è¿žæŽ¥. 
+// å¦‚æžœTCBè¡¨ä¸­æ²¡æœ‰æ¡ç›®å¯ç”¨, è¿™ä¸ªå‡½æ•°è¿”å›ž-1.
 int stcp_server_sock(unsigned int server_port) 
 {
 	int i;
@@ -73,9 +73,9 @@ int stcp_server_sock(unsigned int server_port)
 	return -1;
 }
 
-// Õâ¸öº¯ÊýÊ¹ÓÃsockfd»ñµÃTCBÖ¸Õë, ²¢½«Á¬½ÓµÄstate×ª»»ÎªLISTENING. ËüÈ»ºóÆô¶¯¶¨Ê±Æ÷½øÈëÃ¦µÈ´ýÖ±µ½TCB×´Ì¬×ª»»ÎªCONNECTED 
-// (µ±ÊÕµ½SYNÊ±, seghandler»á½øÐÐ×´Ì¬µÄ×ª»»). ¸Ãº¯ÊýÔÚÒ»¸öÎÞÇîÑ­»·ÖÐµÈ´ýTCBµÄstate×ª»»ÎªCONNECTED,  
-// µ±·¢ÉúÁË×ª»»Ê±, ¸Ãº¯Êý·µ»Ø1. Äã¿ÉÒÔÊ¹ÓÃ²»Í¬µÄ·½·¨À´ÊµÏÖÕâÖÖ×èÈûµÈ´ý.
+// è¿™ä¸ªå‡½æ•°ä½¿ç”¨sockfdèŽ·å¾—TCBæŒ‡é’ˆ, å¹¶å°†è¿žæŽ¥çš„stateè½¬æ¢ä¸ºLISTENING. å®ƒç„¶åŽå¯åŠ¨å®šæ—¶å™¨è¿›å…¥å¿™ç­‰å¾…ç›´åˆ°TCBçŠ¶æ€è½¬æ¢ä¸ºCONNECTED 
+// (å½“æ”¶åˆ°SYNæ—¶, seghandlerä¼šè¿›è¡ŒçŠ¶æ€çš„è½¬æ¢). è¯¥å‡½æ•°åœ¨ä¸€ä¸ªæ— ç©·å¾ªçŽ¯ä¸­ç­‰å¾…TCBçš„stateè½¬æ¢ä¸ºCONNECTED,  
+// å½“å‘ç”Ÿäº†è½¬æ¢æ—¶, è¯¥å‡½æ•°è¿”å›ž1. ä½ å¯ä»¥ä½¿ç”¨ä¸åŒçš„æ–¹æ³•æ¥å®žçŽ°è¿™ç§é˜»å¡žç­‰å¾….
 int stcp_server_accept(int sockfd) 
 {
 	if (sockfd < 0 || sockfd >= MAX_TRANSPORT_CONNECTIONS)
@@ -93,8 +93,8 @@ int stcp_server_accept(int sockfd)
 	}
 }
 
-// ½ÓÊÕÀ´×ÔSTCP¿Í»§¶ËµÄÊý¾Ý. Õâ¸öº¯ÊýÃ¿¸ôRECVBUF_POLLING_INTERVALÊ±¼ä
-// ¾Í²éÑ¯½ÓÊÕ»º³åÇø, Ö±µ½µÈ´ýµÄÊý¾Ýµ½´ï, ËüÈ»ºó´æ´¢Êý¾Ý²¢·µ»Ø1. Èç¹ûÕâ¸öº¯ÊýÊ§°Ü, Ôò·µ»Ø-1.
+// æŽ¥æ”¶æ¥è‡ªSTCPå®¢æˆ·ç«¯çš„æ•°æ®. è¿™ä¸ªå‡½æ•°æ¯éš”RECVBUF_POLLING_INTERVALæ—¶é—´
+// å°±æŸ¥è¯¢æŽ¥æ”¶ç¼“å†²åŒº, ç›´åˆ°ç­‰å¾…çš„æ•°æ®åˆ°è¾¾, å®ƒç„¶åŽå­˜å‚¨æ•°æ®å¹¶è¿”å›ž1. å¦‚æžœè¿™ä¸ªå‡½æ•°å¤±è´¥, åˆ™è¿”å›ž-1.
 int stcp_server_recv(int sockfd, void* buf, unsigned int length) 
 {
 	if (sockfd < 0 || sockfd >= MAX_TRANSPORT_CONNECTIONS)
@@ -132,17 +132,21 @@ int stcp_server_recv(int sockfd, void* buf, unsigned int length)
 
 
 
-// Õâ¸öº¯Êýµ÷ÓÃfree()ÊÍ·ÅTCBÌõÄ¿. Ëü½«¸ÃÌõÄ¿±ê¼ÇÎªNULL, ³É¹¦Ê±(¼´Î»ÓÚÕýÈ·µÄ×´Ì¬)·µ»Ø1,
-// Ê§°ÜÊ±(¼´Î»ÓÚ´íÎóµÄ×´Ì¬)·µ»Ø-1.
+// è¿™ä¸ªå‡½æ•°è°ƒç”¨free()é‡Šæ”¾TCBæ¡ç›®. å®ƒå°†è¯¥æ¡ç›®æ ‡è®°ä¸ºNULL, æˆåŠŸæ—¶(å³ä½äºŽæ­£ç¡®çš„çŠ¶æ€)è¿”å›ž1,
+// å¤±è´¥æ—¶(å³ä½äºŽé”™è¯¯çš„çŠ¶æ€)è¿”å›ž-1.
 int stcp_server_close(int sockfd) 
 {
-	  if (sockfd < 0 || sockfd >= MAX_TRANSPORT_CONNECTIONS)
+	if (sockfd < 0 || sockfd >= MAX_TRANSPORT_CONNECTIONS) {
 		return -1;
+	}
+		
 	server_tcb_t *tcb = server_tcb_table[sockfd];
-	if (tcb == NULL)
+	if (tcb == NULL) {
 		return -1;
-	if (tcb -> state != CLOSED)
+	}
+	if (tcb -> state != CLOSED) {
 		return -1;
+	}
 	
 	pthread_mutex_destroy(tcb -> bufMutex);
 	free(tcb -> recvBuf);
