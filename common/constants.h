@@ -16,7 +16,7 @@
 
 //最大段长度
 //MAX_SEG_LEN = 1500 - sizeof(seg header) - sizeof(ip header)
-#define MAX_SEG_LEN  1464
+#define MAX_SEG_LEN  1000
 //#define MAX_SEG_LEN 200
 
 //数据包丢失率为10%

@@ -424,3 +424,17 @@ build_segment_head(seg_t* segment, int src_port, int dest_port, int length, int 
 	segment -> header.length = length;
 	segment -> header.type = type;	
 }
+
+/*sendbuf clear or not*/
+bool
+stcp_client_sendclear(int sockfd){
+	if (sockfd < 0 || sockfd >= MAX_TRANSPORT_CONNECTIONS)
+		return true;
+	client_tcb_t *tcb = client_tcb_table[sockfd];
+	if (tcb == NULL) 
+		return true;
+	if (tcb -> state != CONNECTED)
+		return true;
+
+	return (tcb -> unAck_segNum == 0) ? false : true;
+}

@@ -31,9 +31,11 @@ int readn(int socket_fd, char *buf, int len, int flag) {
  */
 int son_sendpkt(int nextNodeID, sip_pkt_t* pkt, int son_conn) {
 	
-	sendpkt_arg_t *sendpkt_arg = (sendpkt_arg_t *)malloc(sizeof(sendpkt_arg_t));
+	sendpkt_arg_t new_sendpkt_arg;
+	sendpkt_arg_t *sendpkt_arg = &new_sendpkt_arg;
 	sendpkt_arg -> nextNodeID = nextNodeID;
-	memcpy((char *)sendpkt_arg + sizeof(int), pkt, sizeof(sip_pkt_t));
+	sendpkt_arg -> pkt = *pkt;
+	//(sendpkt_arg -> data, pkt, sizeof(sip_pkt_t));
 	
 	int connd;
 	connd = send(son_conn, "!&", 2, 0);
@@ -63,8 +65,8 @@ int son_recvpkt(sip_pkt_t* pkt, int son_conn) {
 	int connd;
 	connd = readn(son_conn, (char *)pkt, SIP_HEADER_LEN, 0);
 	connd = readn(son_conn, (char *)pkt + SIP_HEADER_LEN, pkt -> header.length, 0);
-	
 	connd = readn(son_conn, (char *)sign, 2, 0);
+	
 	if (connd <= 0)
 		return -1;
 	if (strncmp(sign, "!#", 2) != 0)

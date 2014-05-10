@@ -10,6 +10,7 @@
 #define STCPCLIENT_H
 #include <pthread.h>
 #include "../common/seg.h"
+#include "../common/bool.h"
 
 //FSM中使用的客户端状态
 #define	CLOSED 1
@@ -130,5 +131,7 @@ void* sendBuf_timer(void* clienttcb);
 
 
 void build_segment_head(seg_t* segment, int src_port, int dest_port, int length, int type);
+
+bool stcp_client_sendclear(int sockfd);
 
 #endif

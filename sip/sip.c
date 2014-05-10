@@ -170,7 +170,7 @@ void* pkthandler(void* arg) {
 			
 			if(pkt.header.dest_nodeID == host_node){
 				if (stcp_conn != -1) {
-					int result = forwardsegToSTCP(stcp_conn, pkt.header.src_nodeID, (seg_t*)pkt.data);
+					forwardsegToSTCP(stcp_conn, pkt.header.src_nodeID, (seg_t*)pkt.data);
 				}
 			}
 			else{

@@ -15,7 +15,7 @@
 #define CLIENTPORT1 87
 #define SERVERPORT1 88
 
-#define WAITTIME 40
+#define WAITTIME 200
 
 //这个函数连接到本地SIP进程的端口SIP_PORT. 如果TCP连接失败, 返回-1. 连接成功, 返回TCP套接字描述符, STCP将使用该描述符发送段.
 int connectToSIP() {
@@ -68,12 +68,14 @@ int main() {
 	char* buf = (char*) malloc(fileLen);
 	stcp_server_recv(sockfd,buf,fileLen);
 
+	printf("received all data\n");
 
 	FILE* f;
 	f = fopen("receivedtext.txt","a");
 	fwrite(buf,fileLen,1,f);
 	fclose(f);
 	free(buf);
+
 
 	sleep(WAITTIME);
 
