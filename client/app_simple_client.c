@@ -149,4 +149,6 @@ int main() {
 
 	//断开与SIP进程之间的连接
 	disconnectToSIP(sip_conn);
+
+	return 0;
 }

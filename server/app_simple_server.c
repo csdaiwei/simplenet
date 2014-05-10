@@ -119,4 +119,6 @@ int main() {
 
 	//¶Ï¿ªÓëSIP½ø³ÌÖ®¼äµÄÁ¬½Ó
 	disconnectToSIP(sip_conn);
+
+	return 0;
 }

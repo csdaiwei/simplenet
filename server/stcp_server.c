@@ -217,7 +217,7 @@ void* seghandler(void* arg)
 		int src_nodeID;
 		connection_state = sip_recvseg(sip_conn, &src_nodeID, &recv_segment);
 		
-		printf("stcp server recv a segment from node %d, segment type %d\n", src_nodeID, recv_segment.header.type);
+		//printf("stcp server recv a segment from node %d, segment type %d\n", src_nodeID, recv_segment.header.type);
 
 		if (connection_state == -1) {
 			continue;	//seg lost

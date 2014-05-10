@@ -32,7 +32,7 @@
 #define LOACLHOST "127.0.0.1"
 
 //SIP层等待这段时间让SIP路由协议建立路由路径. 
-#define SIP_WAITTIME 30
+#define SIP_WAITTIME 16
 
 /**************************************************************/
 //声明全局变量
@@ -103,6 +103,8 @@ void* routeupdate_daemon(void* arg) {
 
 		sleep(ROUTEUPDATE_INTERVAL);
 	}
+
+	printf("route update daemon stop\n");
 	return NULL;
 }
 
@@ -164,25 +166,26 @@ void* pkthandler(void* arg) {
 		//sip data packet
 		if (pkt.header.type == SIP){
 
-			printf("get a sip packet from %d, to %d ", pkt.header.src_nodeID, pkt.header.dest_nodeID);
+			//printf("get a sip packet from %d, to %d ", pkt.header.src_nodeID, pkt.header.dest_nodeID);
 			
 			if(pkt.header.dest_nodeID == host_node){
 				if (stcp_conn != -1) {
 					int result = forwardsegToSTCP(stcp_conn, pkt.header.src_nodeID, (seg_t*)pkt.data);
-					printf("forward it to local stcp, result %d\n", result);
 				}
 			}
 			else{
 				int nextNodeID = routingtable_getnextnode(routingtable, pkt.header.dest_nodeID);
 				if(nextNodeID != -1){
 					int result = son_sendpkt(nextNodeID, &pkt, son_conn);
+					printf("get a sip packet from %d, to %d ", pkt.header.src_nodeID, pkt.header.dest_nodeID);
 					printf("forward it to node %d, result %d\n", nextNodeID, result);
 				}
 				else printf("error, dest node unreachable\n");
 			}
 		}
 	}
-	printf("pkthandler stop\n");
+	printf("sip pkthandler stop\n");
+	return NULL;
 
 }
 
@@ -193,8 +196,8 @@ void sip_stop() {
 	nbrcosttable_destroy(nct);
 	dvtable_destroy(dv);
 	routingtable_destroy(routingtable);
-	
 	close(son_conn);
+	printf("\nstop SIP network\n");
 	exit(0);
 }
 
@@ -238,7 +241,7 @@ void waitSTCP() {
 			if(nextNodeID != -1)
 				son_sendpkt(nextNodeID, &pkt, son_conn);
 
-			printf("receive a segment from stcp, dest_nodeID %d, send to node %d\n", dest_nodeID, nextNodeID);
+			//printf("receive a segment from stcp, dest_nodeID %d, send to node %d\n", dest_nodeID, nextNodeID);
 		}
 		printf("STCP has disconnected to local SIP network\n");
 		stcp_conn = -1;
@@ -293,6 +296,8 @@ int main(int argc, char *argv[]) {
 	//等待来自STCP进程的连接
 	printf("waiting for connection from STCP process\n");
 	waitSTCP(); 
+
+	return 0;
 }
 
 

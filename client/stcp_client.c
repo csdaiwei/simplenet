@@ -327,7 +327,7 @@ void* seghandler(void* arg)
 		if (recv_segment.header.type == DATAACK) {
 			if(tcb -> state == CONNECTED){
 				
-				printf("receive a dataack segment, ack %d\n", recv_segment.header.ack_num);
+				//printf("receive a dataack segment, ack %d\n", recv_segment.header.ack_num);
 
 				int ack = recv_segment.header.ack_num;
 

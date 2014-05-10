@@ -118,14 +118,18 @@ void* listen_to_neighbor(void* arg) {
 		if (nt == NULL)
 			return NULL;
 
-		//sip_pkt_t *recv_packet = (sip_pkt_t *)malloc(sizeof(sip_pkt_t));
 		sip_pkt_t recv_packet;
-		int connd = recvpkt(&recv_packet, neighbor_entry -> conn);
-		if (connd == -1)
-			return NULL;
+		if(neighbor_entry -> conn != -1){	
+			int connd = recvpkt(&recv_packet, neighbor_entry -> conn);
+			if (connd == -1)
+				break;
+		}
 		if (sip_conn != -1)
 			forwardpktToSIP(&recv_packet, sip_conn);
 	}
+	printf("a neighbour disconnected, nodeID: %d\n", neighbor_entry -> nodeID);
+	neighbor_entry -> conn = -1;
+	return NULL;
 }
 
 //这个函数打开TCP端口SON_PORT, 等待来自本地SIP进程的进入连接. 
@@ -149,7 +153,7 @@ void waitSIP() {
 		printf("SIP has connected to local SON network\n");
 	
 		while (true) {
-		//receive a packet from SIP
+			//receive a packet from SIP
 			int next_node_id;
 			sip_pkt_t send_packet;
 			int connd = getpktToSend(&send_packet, &next_node_id, sip_conn);
@@ -161,11 +165,14 @@ void waitSIP() {
 			nbr_entry_t *neighbor_entry = nt;
 			int i;
 			for (i = 0; i < nbr_entry_num; i ++) {
-				if (next_node_id == BROADCAST_NODEID || next_node_id == neighbor_entry -> nodeID)
-					sendpkt(&send_packet, neighbor_entry -> conn);
+				if (next_node_id == BROADCAST_NODEID || next_node_id == neighbor_entry -> nodeID){
+					if(neighbor_entry -> conn != -1)
+						sendpkt(&send_packet, neighbor_entry -> conn);
+				}
 				neighbor_entry ++;
 			}
 		}
+		sip_conn = -1;
 	}
 }
 

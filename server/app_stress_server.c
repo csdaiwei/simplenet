@@ -83,4 +83,6 @@ int main() {
 	}				
 
 	disconnectToSIP(sip_conn);
+
+	return 0;
 }
