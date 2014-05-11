@@ -44,6 +44,8 @@ dv_t* dvtable_create(){
 		}
 	}
 
+	free(nbr_id_array);
+	free(node_id_array);
   	return dv;
 }
 

@@ -31,6 +31,7 @@ routingtable_t* routingtable_create(){
 	for (i = 0; i < nbr_num; ++i)
 		routingtable_setnextnode(rt, nbr_array[i], nbr_array[i]);
 
+	free(nbr_array);
   	return rt;
 }
 

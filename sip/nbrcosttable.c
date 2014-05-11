@@ -28,7 +28,7 @@ nbr_cost_entry_t* nbrcosttable_create(){
 		nct[i].nodeID = nbr_id_array[i];
 		nct[i].cost = topology_getCost(local_id, nct[i].nodeID);
 	}
-
+	free(nbr_id_array);
   	return nct;
 }
 

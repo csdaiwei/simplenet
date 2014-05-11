@@ -88,13 +88,16 @@ void* routeupdate_daemon(void* arg) {
 		packet_route_uptate.entryNum = topology_getNodeNum();
 		int* node_array = topology_getNodeArray();
 		
+		pthread_mutex_lock(dv_mutex);
 		for (i = 0; i < packet_route_uptate.entryNum; i ++) {
 			packet_route_uptate.entry[i].nodeID = node_array[i];
 			packet_route_uptate.entry[i].cost = dvtable_getcost(dv, host_node, node_array[i]);
 		}
+		pthread_mutex_unlock(dv_mutex);
 		sip_packet.header.length = sizeof(unsigned int) * (2 * packet_route_uptate.entryNum + 1);
 		memcpy(sip_packet.data, &packet_route_uptate, sip_packet.header.length);
-
+		free(node_array);
+		
 		connd = son_sendpkt(BROADCAST_NODEID, &sip_packet, son_conn);
 		if (connd == -1)
 			break;
@@ -119,6 +122,8 @@ void route_update(sip_pkt_t* pkt){
 
 	pkt_routeupdate_t *rup = (pkt_routeupdate_t *)((char *)(pkt) + SIP_HEADER_LEN);
 
+	pthread_mutex_lock(dv_mutex);
+	pthread_mutex_lock(routingtable_mutex);
 	for (i = 0; i < rup -> entryNum; ++i)
 		dvtable_setcost(dv, pkt -> header.src_nodeID, rup -> entry[i].nodeID, rup -> entry[i].cost);
 
@@ -144,6 +149,11 @@ void route_update(sip_pkt_t* pkt){
 			routingtable_setnextnode(routingtable, dest_node, min_relay_node);
 		}
 	}
+	pthread_mutex_unlock(dv_mutex);
+	pthread_mutex_unlock(routingtable_mutex);
+
+	free(node_array);
+	free(nbr_node_array);
 }
 
 
@@ -196,6 +206,10 @@ void sip_stop() {
 	nbrcosttable_destroy(nct);
 	dvtable_destroy(dv);
 	routingtable_destroy(routingtable);
+
+	free(dv_mutex);
+	free(routingtable_mutex);
+
 	close(son_conn);
 	printf("\nstop SIP network\n");
 	exit(0);
@@ -279,13 +293,18 @@ int main(int argc, char *argv[]) {
 		exit(1);		
 	}
 	
+	//set detached thread attr to avoid memory leak
+	pthread_attr_t attr;
+ 	pthread_attr_init (&attr);
+ 	pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
+
 	//启动线程处理来自SON进程的进入报文 
 	pthread_t pkt_handler_thread; 
-	pthread_create(&pkt_handler_thread,NULL,pkthandler,(void*)0);
+	pthread_create(&pkt_handler_thread,&attr,pkthandler,(void*)0);
 
 	//启动路由更新线程 
 	pthread_t routeupdate_thread;
-	pthread_create(&routeupdate_thread,NULL,routeupdate_daemon,(void*)0);	
+	pthread_create(&routeupdate_thread,&attr,routeupdate_daemon,(void*)0);	
 
 	printf("SIP layer is started...\n");
 	printf("waiting for routes to be established\n");

@@ -198,7 +198,8 @@ unsigned int topology_getCost(int fromNodeID, int toNodeID) {
       (topology_getNodeIDfromname(host_name_2) == fromNodeID && 
       topology_getNodeIDfromname(host_name_1) == toNodeID)) {
       char *cost = strtok(NULL, " ");
-      return (unsigned int)atoi(cost);
+        fclose(fp);
+        return (unsigned int)atoi(cost);
       }
   }
   fclose(fp);

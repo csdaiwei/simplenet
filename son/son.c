@@ -113,6 +113,8 @@ int connectNbrs() {
 //所有的listen_to_neighbor线程都是在到邻居的TCP连接全部建立之后启动的.
 void* listen_to_neighbor(void* arg) {
 	nbr_entry_t *neighbor_entry = nt + *((int *)arg);
+	free((int *)arg);
+
 	while (true) {
 		
 		if (nt == NULL)
@@ -223,12 +225,18 @@ int main() {
 
 	//此时, 所有与邻居之间的连接都建立好了
 	
+	
+	//set detached thread attr to avoid memory leak
+	pthread_attr_t attr;
+ 	pthread_attr_init (&attr);
+ 	pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
+
 	//创建线程监听所有邻居
 	for(i=0;i<nbr_entry_num;i++) {
 		int* idx = (int*)malloc(sizeof(int));
 		*idx = i;
 		pthread_t nbr_listen_thread;
-		pthread_create(&nbr_listen_thread,NULL,listen_to_neighbor,(void*)idx);
+		pthread_create(&nbr_listen_thread, &attr, listen_to_neighbor, (void*)idx);
 	}
 	printf("Overlay network: node initialized...\n");
 	printf("Overlay network: waiting for connection from SIP process...\n");
