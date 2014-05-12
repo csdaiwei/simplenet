@@ -212,7 +212,7 @@ void sip_stop() {
 
 	close(son_conn);
 	printf("\nstop SIP network\n");
-	exit(0);
+	exit(0);	//this is rude.
 }
 
 //这个函数打开端口SIP_PORT并等待来自本地STCP进程的TCP连接.

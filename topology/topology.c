@@ -28,6 +28,18 @@ int topology_getNodeIDfromname(char *hostname) {
   if (host == NULL)
     return -1;
   return host -> h_addr[3] & 0x000000ff;
+
+/*
+  if(strcmp(hostname, "csnetlab_1") == 0)
+    return 129;
+  if(strcmp(hostname, "csnetlab_2") == 0)
+    return 130;
+  if(strcmp(hostname, "csnetlab_3") == 0)
+    return 131;
+  if(strcmp(hostname, "csnetlab_4") == 0)
+    return 132;
+
+  return -1;*/
 }
 
 

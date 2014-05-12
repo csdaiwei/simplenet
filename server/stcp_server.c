@@ -148,16 +148,19 @@ int stcp_server_close(int sockfd)
 		return -1;
 	}
 	
-	pthread_mutex_destroy(tcb -> bufMutex);
+	free(tcb -> bufMutex);	//modify
 	free(tcb -> recvBuf);
 	free(tcb);
-	tcb = NULL;
+	server_tcb_table[sockfd] = NULL;
 	
 	return 1;
 }
 
 /*new functions for seghandler*/
 void *wait_to_close_server(void *servertcb) {
+
+	pthread_detach(pthread_self());	//modify
+	
 	server_tcb_t *tcb = (server_tcb_t *)servertcb;
 	
 	sleep(CLOSEWAIT_TIMEOUT);
@@ -207,6 +210,8 @@ int get_client_port(int sockfd) {
 void* seghandler(void* arg)
 {
   	
+  	pthread_detach(pthread_self());	//modify
+
   	int sockfd;
 	int connection_state;
 	

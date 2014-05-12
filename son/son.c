@@ -183,9 +183,8 @@ void waitSIP() {
 void son_stop() {
 	nt_destroy(nt);
 	close(sip_conn);
-	nt = NULL;
 	printf("\nstop SON network\n");
-	exit(0);
+	exit(0);	//this is rude.
 }
 
 int main() {

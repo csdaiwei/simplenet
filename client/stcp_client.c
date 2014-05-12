@@ -93,7 +93,7 @@ int stcp_client_connect(int sockfd, int nodeID, unsigned int server_port)
 	tcb -> server_portNum = server_port;
 	//set send segment.
 	seg_t send_segment;
-
+	memset(&send_segment, 0, sizeof(seg_t));
 	build_segment_head(&send_segment, tcb -> client_portNum, server_port, 0, SYN);
 
 	int send_num = 0;
@@ -259,10 +259,10 @@ int stcp_client_close(int sockfd)
 	if (tcb -> state != CLOSED)
 		return -1;
 	
-	pthread_mutex_destroy(tcb -> bufMutex);
+	free(tcb -> bufMutex);	//modify
 	free(tcb);
-	
-	tcb = NULL;
+	client_tcb_table[sockfd] = NULL;
+
 	return 1;
 }
 
@@ -273,10 +273,13 @@ int stcp_get_sockfd(seg_t *segment) {
 	int i;
 	for (i = 0; i < MAX_TRANSPORT_CONNECTIONS; i++) {
 		client_tcb_t *tcb = client_tcb_table[i];
-		if (tcb != NULL && tcb -> state != CLOSED) {
-			if ((tcb -> client_portNum == segment -> header.dest_port) 
-				&& (tcb -> server_portNum == segment -> header.src_port))
-				return i;
+		if (tcb != NULL){
+			if(tcb -> state != CLOSED){
+				if ((tcb -> client_portNum == segment -> header.dest_port) 
+					&& (tcb -> server_portNum == segment -> header.src_port)) {
+					return i;
+				}
+			}
 		}
 	}
 	return -1;
@@ -287,6 +290,9 @@ int stcp_get_sockfd(seg_t *segment) {
 // 线程将终止. 根据STCP段到达时连接所处的状态, 可以采取不同的动作. 请查看客户端FSM以了解更多细节.
 void* seghandler(void* arg) 
 {
+
+	pthread_detach(pthread_self());	//modify
+
   	seg_t recv_segment;
 	int sockfd;
 	int connection_state;
@@ -375,6 +381,9 @@ void* seghandler(void* arg)
 //当超时事件发生时, 重新发送所有已发送但未被确认段. 当发送缓冲区为空时, 这个线程将终止.
 void* sendBuf_timer(void* clienttcb) 
 {
+
+	pthread_detach(pthread_self());	//modify
+
 	client_tcb_t* tcb = (client_tcb_t*)clienttcb;
 
 	while(true){
@@ -399,7 +408,7 @@ void* sendBuf_timer(void* clienttcb)
 				
 				assert(resent_segBuf != NULL);
 				sip_sendseg(sip_conn, tcb -> server_nodeID, &(resent_segBuf -> seg));
-		//		printf("resend the data segment, seq %d\n", (resent_segBuf -> seg). header.seq_num);
+				//printf("resend the data segment, seq %d\n", (resent_segBuf -> seg). header.seq_num);
 
 				resent_segBuf -> sentTime = get_time();
 				resent_segBuf = resent_segBuf -> next;
@@ -418,6 +427,8 @@ void* sendBuf_timer(void* clienttcb)
 
 void
 build_segment_head(seg_t* segment, int src_port, int dest_port, int length, int type){
+
+	memset(segment, 0, sizeof(seg_t));	//modify
 
 	segment -> header.src_port = src_port;
 	segment -> header.dest_port = dest_port;
