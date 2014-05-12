@@ -25,7 +25,7 @@
 struct im_pkt_head {
 	char type; 	/* 0x00 request: client to server
 				 * 0x01 response: server to client*/
-	char service;	/*see service constants defined below*/
+	char service;	/*see service constants field defined below*/
 	short data_size;
 };
 #pragma pack()
@@ -57,7 +57,7 @@ struct im_pkt_head {
 	type 		service
 	REQUEST 	ONLINE_NOTIFY
 	REQUEST 	OFFLINE_NOTIFY
-	RsESPONSE 	LOGOUT
+	RESPONSE 	LOGOUT
  */
 
 

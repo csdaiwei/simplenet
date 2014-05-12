@@ -14,4 +14,6 @@ client/app_simple_client
 client/app_stress_client
 server/app_simple_server
 server/app_stress_server
+IM/client
+IM/server
 

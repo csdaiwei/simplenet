@@ -7,7 +7,7 @@
 /*get keyoard input within limited characters.
  *\t and \n will not be accepted
  *the buf[size-1] will always be \0
- *return the number of input characeters not including \0 in the last*/
+ *return the number of input characeters not include \0 in the last*/
 int
 get_keyboard_input(char *buf, int size) {
 	int buf_len = 0;
