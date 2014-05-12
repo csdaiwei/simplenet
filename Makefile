@@ -1,7 +1,7 @@
-CFLAGS = -g -Wall # -pedantic -std=c99
+CFLAGS = -g # -Wall -pedantic -std=c99
 
 
-all: son/son sip/sip client/app_simple_client server/app_simple_server client/app_stress_client server/app_stress_server   
+all: son/son sip/sip client/app_simple_client server/app_simple_server client/app_stress_client server/app_stress_server IM/client IM/server
 
 common/pkt.o: common/pkt.c common/pkt.h common/constants.h
 	gcc $(CFLAGS) -c common/pkt.c -o common/pkt.o
@@ -23,10 +23,18 @@ client/app_simple_client: client/app_simple_client.c common/seg.o common/pkt.o c
 	gcc $(CFLAGS) -pthread client/app_simple_client.c common/seg.o common/pkt.o client/stcp_client.o topology/topology.o -o client/app_simple_client 
 client/app_stress_client: client/app_stress_client.c common/seg.o common/pkt.o client/stcp_client.o topology/topology.o 
 	gcc $(CFLAGS) -pthread client/app_stress_client.c common/seg.o common/pkt.o client/stcp_client.o topology/topology.o -o client/app_stress_client 
+
+IM/client: IM/client.c IM/stcp.c IM/common/*.c common/seg.o common/pkt.o topology/topology.o 
+	gcc $(CFLAGS) -pthread IM/client.c IM/common/*.c common/seg.o common/pkt.o IM/stcp.c topology/topology.o -o IM/client
+
 server/app_simple_server: server/app_simple_server.c common/seg.o common/pkt.o server/stcp_server.o topology/topology.o 
 	gcc $(CFLAGS) -pthread server/app_simple_server.c common/seg.o common/pkt.o server/stcp_server.o topology/topology.o -o server/app_simple_server
 server/app_stress_server: server/app_stress_server.c common/seg.o common/pkt.o server/stcp_server.o topology/topology.o 
 	gcc $(CFLAGS) -pthread server/app_stress_server.c common/seg.o common/pkt.o server/stcp_server.o topology/topology.o -o server/app_stress_server
+
+IM/server: IM/server.c IM/stcp.c IM/common/*.c common/seg.o common/pkt.o topology/topology.o 
+	gcc $(CFLAGS) -pthread IM/server.c IM/common/*.c common/seg.o common/pkt.o IM/stcp.c topology/topology.o -o IM/server
+
 common/seg.o: common/seg.c common/seg.h
 	gcc $(CFLAGS) -c common/seg.c -o common/seg.o
 client/stcp_client.o: client/stcp_client.c client/stcp_client.h 
@@ -52,3 +60,5 @@ clean:
 	rm -rf son/son.dSYM
 	rm -rf client/*.dSYM
 	rm -rf server/*.dSYM
+	rm -rf IM/*.dSYM
+	rm -f IM/client IM/server

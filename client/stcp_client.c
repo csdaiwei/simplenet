@@ -266,8 +266,6 @@ int stcp_client_close(int sockfd)
 	return 1;
 }
 
-
-
 /*new func*/
 int stcp_get_sockfd(seg_t *segment) {
 	int i;

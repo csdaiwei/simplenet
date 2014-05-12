@@ -23,3 +23,9 @@ client目录和server目录下提供的app_{simple/stress}_{client/server}.c文�
 使用"kill -s 2 进程号"杀掉son进程和sip进程.
 
 如果程序使用的端口号已被使用, 程序将退出.
+
+IM 运行：
+在son和sip建立成功后，使用./IM/server 启动IM的服务器。
+（需修改IM/server.c 中的SERVER_NODE_ID，使其为该节点的nodeID）
+在其他节点上，./IM/client 启动IM的客户端。
+（需修改IM/client.c 中的SERVER_NODE_ID，使其为服务器节点的nodeID）

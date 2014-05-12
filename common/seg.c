@@ -41,7 +41,7 @@ int sip_recvseg(int sip_conn, int* src_nodeID, seg_t* segPtr)
 	int is_lost = seglost(segPtr);	//1 means lost, 0 ok
 	if(is_lost == 0 && checkchecksum(segPtr) != 1){	
 		is_lost = 1;//checksum failed, set lost.
-		printf("checkchecksum failed\n");
+		//printf("checkchecksum failed\n");
 	}
 
 	return (is_lost == 0) ? 1: -1;
@@ -85,7 +85,7 @@ int seglost(seg_t* segPtr)
 	if(random<PKT_LOSS_RATE*100) {
 		
 		if(rand()%2==0) {
-			printf("seg lost!!!\n");
+			//printf("seg lost!!!\n");
       		return 1;
 		}
 		else {
@@ -94,7 +94,7 @@ int seglost(seg_t* segPtr)
 			char* temp = (char*)segPtr;
 			temp = temp + errorbit/8;
 			*temp = *temp^(1<<(errorbit%8));
-			printf("error bit!!!\n");
+			//printf("error bit!!!\n");
 			return 0;
 		}
 	}

@@ -100,7 +100,7 @@ int main() {
 	
 	//获取sendthis.txt文件长度, 创建缓冲区并读取文件中的数据
 	FILE *f;
-	f = fopen("OliverTwist.txt","r");
+	f = fopen("sendthis.txt","r");
 	assert(f!=NULL);
 	fseek(f,0,SEEK_END);
 	int fileLen = ftell(f);
